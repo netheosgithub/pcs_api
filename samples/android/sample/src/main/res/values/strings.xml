@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Cumulus Demo</string>
+    <string name="auth_error">The authentication failed</string>
+    <string name="title_activity_menu">Cumulus</string>
+    <string name="hello_world">Cumulus Demo</string>
+
+</resources>

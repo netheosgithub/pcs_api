@@ -1,0 +1,8 @@
+if [ ! -z "$PYTHONPATH" ] ; then
+    PYTHONPATH="$PYTHONPATH:"
+else
+    PYTHONPATH=""
+fi
+export PYTHONPATH="${PYTHONPATH}$PWD"
+
+echo "set PYTHONPATH to $PYTHONPATH"

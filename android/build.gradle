@@ -1,0 +1,33 @@
+group = 'net.netheos'
+version = '1.0-SNAPSHOT'
+
+println('Project name : ' + project.name)
+println('Project version : ' + project.version)
+println('Sub(s) project(s) : ' + project.childProjects)
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.9.1'
+    }
+}
+
+allprojects {
+    apply plugin: 'maven'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                repository(url: "file://${System.properties['user.home']}/.m2/repository")
+            }
+        }
+    }
+
+}
