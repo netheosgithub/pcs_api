@@ -30,6 +30,8 @@
 package net.netheos.pcsapi.providers.googledrive;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.Iterator;
 import net.netheos.pcsapi.bytesio.MemoryByteSource;
 import net.netheos.pcsapi.credentials.AppInfoFileRepository;
 import net.netheos.pcsapi.credentials.UserCredentialsFileRepository;
@@ -39,8 +41,11 @@ import net.netheos.pcsapi.models.CFolderContent;
 import net.netheos.pcsapi.models.CPath;
 import net.netheos.pcsapi.models.CUploadRequest;
 import net.netheos.pcsapi.providers.MiscUtils;
+import net.netheos.pcsapi.providers.StorageProviderFactory;
 import net.netheos.pcsapi.storage.IStorageProvider;
 import net.netheos.pcsapi.storage.StorageFacade;
+import net.netheos.pcsapi.storage.StorageProvider;
+import org.hamcrest.CoreMatchers;
 import static org.junit.Assert.*;
 import org.junit.Assume;
 import org.junit.Before;
@@ -58,25 +63,16 @@ public class GoogleDriveTest
     public void setUp()
             throws Exception
     {
-        String path = System.getProperty( "pcsapiRepositoryDir" );
-        if ( path == null ) {
-            path = System.getenv( "PCS_API_REPOSITORY_DIR" );
+        Collection<Object[]> providers = StorageProviderFactory.storageProviderFactory();
+        // Find google in this list:
+        for (Iterator<Object[]> it=providers.iterator() ; it.hasNext() ; ) {
+            Object[] prov = it.next();
+            if ( prov[0] instanceof GoogleDrive) {
+                storage = (StorageProvider)prov[0];
+                break;
+            }
         }
-        if ( path == null ) {
-            path = "../repositories";
-        }
-        File repository = new File( path );
-
-        File appRepoFile = new File( repository, "app_info_data.txt" );
-        AppInfoFileRepository appRepo = new AppInfoFileRepository( appRepoFile );
-
-        File credRepoFile = new File( repository, "user_credentials_data.txt" );
-        UserCredentialsFileRepository credRepo = new UserCredentialsFileRepository( credRepoFile );
-
-        storage = StorageFacade.forProvider( GoogleDrive.PROVIDER_NAME )
-                .setAppInfoRepository( appRepo, appRepo.get( GoogleDrive.PROVIDER_NAME ).getAppName() )
-                .setUserCredentialsRepository( credRepo, null )
-                .build();
+        Assume.assumeThat( "GoogleDrive provider found", storage, CoreMatchers.notNullValue() );
     }
 
     @Test

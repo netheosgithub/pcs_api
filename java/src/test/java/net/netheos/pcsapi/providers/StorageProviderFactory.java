@@ -1,19 +1,15 @@
 /**
  * Copyright (c) 2014 Netheos (http://www.netheos.net)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
-
 package net.netheos.pcsapi.providers;
 
 import net.netheos.pcsapi.credentials.AppInfoFileRepository;
@@ -32,7 +28,6 @@ import java.util.Collections;
 
 import net.netheos.pcsapi.credentials.AppInfoRepository;
 import net.netheos.pcsapi.credentials.UserCredentialsRepository;
-import net.netheos.pcsapi.storage.IStorageProvider;
 import net.netheos.pcsapi.utils.PcsUtils;
 
 import org.apache.http.client.HttpClient;
@@ -47,7 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 public class StorageProviderFactory
@@ -77,13 +71,6 @@ public class StorageProviderFactory
         }
 
         File repository = new File( path );
-        if ( !repository.isDirectory() ) {
-            LOGGER.warn( "No repository defined for functional tests."
-                         + " Set PCS_API_REPOSITORY_DIR environment variable,"
-                         + " or set pcsapiRepositoryDir system property" );
-            LOGGER.warn( "No functional test will be run" );
-            return Collections.EMPTY_LIST; // list of providers to be tested
-        }
 
         String providers = System.getProperty( "pcsapiProviders" );
 
@@ -93,6 +80,15 @@ public class StorageProviderFactory
         }
 
         File appRepoFile = new File( repository, "app_info_data.txt" );
+
+        if ( !appRepoFile.exists() ) {
+            LOGGER.warn( "No app info file found for functional tests."
+                         + " Set PCS_API_REPOSITORY_DIR environment variable,"
+                         + " or set pcsapiRepositoryDir system property" );
+            LOGGER.warn( "No functional test will be run" );
+            return Collections.EMPTY_LIST; // list of providers to be tested
+        }
+
         appRepo = new AppInfoFileRepository( appRepoFile );
 
         File credRepoFile = new File( repository, "user_credentials_data.txt" );
