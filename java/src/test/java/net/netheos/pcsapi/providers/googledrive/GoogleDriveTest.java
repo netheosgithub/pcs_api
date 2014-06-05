@@ -14,27 +14,11 @@
  * limitations under the License.
  */
 
-/*
- * Licensed under the Netheos License, Version 1.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at :
- *
- * http://www.netheos.net/licences/LICENCE-1.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- *
- * Copyright @2014 Netheos
- */
 package net.netheos.pcsapi.providers.googledrive;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 import net.netheos.pcsapi.bytesio.MemoryByteSource;
-import net.netheos.pcsapi.credentials.AppInfoFileRepository;
-import net.netheos.pcsapi.credentials.UserCredentialsFileRepository;
 import net.netheos.pcsapi.models.CFile;
 import net.netheos.pcsapi.models.CFolder;
 import net.netheos.pcsapi.models.CFolderContent;
@@ -43,7 +27,6 @@ import net.netheos.pcsapi.models.CUploadRequest;
 import net.netheos.pcsapi.providers.MiscUtils;
 import net.netheos.pcsapi.providers.StorageProviderFactory;
 import net.netheos.pcsapi.storage.IStorageProvider;
-import net.netheos.pcsapi.storage.StorageFacade;
 import net.netheos.pcsapi.storage.StorageProvider;
 import org.hamcrest.CoreMatchers;
 import static org.junit.Assert.*;
@@ -75,6 +58,7 @@ public class GoogleDriveTest
         Assume.assumeThat( "GoogleDrive provider found", storage, CoreMatchers.notNullValue() );
     }
 
+    // Quick check google shared file access.
     @Test
     public void testSharedFiles()
             throws Exception
@@ -92,10 +76,11 @@ public class GoogleDriveTest
             }
 
             // If file not present, we skip the test
-            Assume.assumeTrue( sharedFolder != null );
+            Assume.assumeTrue( "shared folder found", sharedFolder != null );
 
             CPath sharedFilePath = sharedFolder.getPath().add( "shared.jpg" );
-            storage.upload( new CUploadRequest( sharedFilePath, new MemoryByteSource( MiscUtils.generateRandomByteArray( 128000, null ) ) ) );
+            byte[] data = MiscUtils.generateRandomByteArray( 128000, null );
+            storage.upload( new CUploadRequest( sharedFilePath, new MemoryByteSource( data ) ) );
 
             // check file exists
             CFile file = storage.getFile( sharedFilePath );
