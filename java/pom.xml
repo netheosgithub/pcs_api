@@ -3,10 +3,18 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+ 
+    <parent>
+      <groupId>org.sonatype.oss</groupId>
+      <artifactId>oss-parent</artifactId>
+      <version>9</version>
+    </parent>
 
     <groupId>net.netheos</groupId>
     <artifactId>pcsapi</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <description>A lightweight library that abstract providers and gives a uniform API to several personal cloud storages providers</description>
+    <url>https://github.com/netheosgithub/pcs_api</url>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -14,7 +22,18 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
+    <scm>
+      <url>git@github.com:netheosgithub/pcs_api</url>
+      <connection>scm:git:git@github.com:netheosgithub/pcs_api</connection>
+      <developerConnection>scm:git:git@github.com:netheosgithub/pcs_api</developerConnection>
+    </scm>
+    <developers>
+      <developer>
+        <id>netheosgithub</id>
+        <name>Netheos</name>
+        <email>contact@netheos.net</email>
+      </developer>
+    </developers>
     <properties>
         <slf4j.version>1.7.5</slf4j.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

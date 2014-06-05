@@ -402,7 +402,7 @@ public class Dropbox
      *
      * @param methodPath
      * @param path
-     * @return
+     * @return URL
      */
     private String buildContentUrl( String methodPath, CPath path )
     {

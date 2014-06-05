@@ -28,7 +28,7 @@ public interface ByteSink
      * Returns a ByteSinkStream object for writing data, to be closed by caller. This method may be called several times
      * (in case of retries)"
      *
-     * @return
+     * @return ByteSinkStream
      * @throws IOException
      */
     ByteSinkStream openStream()

@@ -172,7 +172,7 @@ public class CloudMe
      *
      * @param dom
      * @param tag
-     * @return
+     * @return long value
      */
     private long getLongFromDom( Document dom, String tag )
     {
@@ -183,7 +183,7 @@ public class CloudMe
      * Lists all blobs (ie files that are not folders) in a given cloudme folder.
      *
      * @param cmFolder CloudMe folder to be listed
-     * @return
+     * @return list of all blobs
      */
     private List<CMBlob> listBlobs( CMFolder cmFolder )
             throws ParseException
@@ -312,7 +312,7 @@ public class CloudMe
      * list all the blobs
      *
      * @param cpath
-     * @return
+     * @return CFolderContent
      * @throws CStorageException
      */
     @Override
@@ -676,7 +676,7 @@ public class CloudMe
      * builds an URL to call Rest services
      *
      * @param methodPath
-     * @return
+     * @return URL
      */
     private String buildRestUrl( String methodPath )
     {
@@ -688,7 +688,7 @@ public class CloudMe
      *
      * @param action
      * @param innerXml
-     * @return
+     * @return HttpPost
      */
     private HttpPost buildSoapRequest( String action, String innerXml )
     {
@@ -772,7 +772,7 @@ public class CloudMe
          *
          * @param response
          * @param cpath
-         * @return
+         * @return CStorageException
          */
         private CStorageException buildCHttpException( CResponse response, CPath cpath )
         {

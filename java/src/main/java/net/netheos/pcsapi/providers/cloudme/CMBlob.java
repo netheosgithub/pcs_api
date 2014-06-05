@@ -52,7 +52,7 @@ public class CMBlob
     /**
      * Converts a CloudMe Blob to a generic CBlob
      *
-     * @return
+     * @return CBlob
      */
     public CBlob toCBlob()
     {
@@ -65,7 +65,7 @@ public class CMBlob
     /**
      * Gets CPath of a CloudMe Blob which is its parent folder's CPath + its base name
      *
-     * @return
+     * @return CPath
      */
     public CPath getPath()
     {

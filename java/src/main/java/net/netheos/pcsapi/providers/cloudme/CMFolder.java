@@ -79,7 +79,7 @@ public class CMFolder implements Iterable<CMFolder>
      * Finds a child according to its name
      *
      * @param name of the folder to find
-     * @return
+     * @return CMFolder
      */
     public CMFolder getChildByName( String name )
     {
@@ -91,7 +91,7 @@ public class CMFolder implements Iterable<CMFolder>
      * Returns null if the folder does not exist
      *
      * @param path
-     * @return
+     * @return CMFolder
      */
     public CMFolder getFolder( CPath path )
     {
@@ -120,7 +120,7 @@ public class CMFolder implements Iterable<CMFolder>
     /**
      * Gets the CPath corresponding to this folder
      *
-     * @return
+     * @return CPath
      */
     public CPath getCPath()
     {
@@ -143,7 +143,7 @@ public class CMFolder implements Iterable<CMFolder>
 
     /**
      * Converts a CloudMe folder to a generic CFolder
-     * @return
+     * @return CFolder
      */
     public CFolder toCFolder()
     {

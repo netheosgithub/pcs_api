@@ -369,7 +369,7 @@ public class GoogleDrive
      *
      * @param path
      * @param parentId
-     * @return
+     * @return id of created folder
      */
     private String rawCreateFolder( CPath path, String parentId )
     {

@@ -133,7 +133,7 @@ public final class PcsUtils
      * Removes query parameters from url (only for logging, as query parameters may contain sensible informations)
      *
      * @param uri
-     * @return
+     * @return URI without parameters
      */
     public static String shortenUrl( URI uri )
     {

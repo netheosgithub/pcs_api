@@ -154,7 +154,7 @@ public class XmlUtils
     /**
      * Parses a string and build a DOM
      *
-     * @return
+     * @return DOM
      */
     public static Document getDomFromString( String str )
     {

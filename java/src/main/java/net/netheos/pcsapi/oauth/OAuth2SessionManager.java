@@ -245,7 +245,7 @@ public class OAuth2SessionManager
      * <p/>
      * Some providers separate permissions with spaces, other with comma... Other do not support scope at all.
      *
-     * @return
+     * @return string for building OAuth authorization URL
      */
     String getScopeForAuthorization()
     {

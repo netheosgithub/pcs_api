@@ -22,7 +22,7 @@ import java.io.InputStream;
 /**
  * A byte source view of a range of bytes from an underlying byte source.
  *
- * @TODO only 1 RangeByteSource is acceptable in pipeline, because of seek()
+ * TODO : only 1 RangeByteSource is acceptable in pipeline, because of seek()
  */
 public class RangeByteSource
         implements ByteSource

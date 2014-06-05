@@ -48,7 +48,7 @@ public class CPath
      * pathname does not contain any backslash.
      *
      * @param pathName
-     * @return
+     * @return normalized string
      */
     private static String normalize( String pathName )
     {
