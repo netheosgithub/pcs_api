@@ -19,7 +19,7 @@ package net.netheos.pcsapi.exceptions;
 import net.netheos.pcsapi.request.CResponse;
 
 /**
- * http 401 error
+ * http 401 error.
  */
 public class CAuthenticationException
         extends CHttpException

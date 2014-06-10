@@ -76,6 +76,7 @@ class CloudMeStorage(IStorageProvider):
         </SOAP-ENV:Body>
         </SOAP-ENV:Envelope>"""
         message = None
+        retriable = False
         try:
             ct = response.headers['Content-Type']
             if 'text/xml' in ct or 'application/xml' in ct:
@@ -100,15 +101,22 @@ class CloudMeStorage(IStorageProvider):
                         if code == '404':
                             #print("Building CFilenotFoundError with msg=",message,"  and c_path=",c_path)
                             return CFileNotFoundError(message, c_path)
+                        # These errors are not retriable, as we have received a well formed response
             else:
                 # We haven't received a standard server error message ?!
+                # This can happen unlikely. Usually such errors are temporary.
                 message = response.text  # This will be the exception error message
                 logger.error('Unparsable server error: %s', message)
                 logger.error('Unparsable server error has headers: %s', response.headers)
                 message = abbreviate('Unparsable server error: ' + message, 200)
+                if response.status_code >= 500:
+                    retriable = True
         except:
             pass
-        return buildCStorageError(response, message, c_path)
+        err = buildCStorageError(response, message, c_path)
+        if retriable:
+            err = CRetriableError(err)
+        return err
 
     def _validate_cloudme_api_response(self, response, c_path):
         """Validate a response from CloudMe XML API.
@@ -131,11 +139,8 @@ class CloudMeStorage(IStorageProvider):
                      response.status_code, response.reason)
 
         if response.status_code >= 300:
-            cse = self._buildCStorageError(response, c_path)
-            #if response.status_code >= 500:
-            #    raise CRetriableError(cse)
-            # other errors are not retriable:
-            raise cse
+            # Determining if error is retriable is not possible without parsing response:
+            raise self._buildCStorageError(response, c_path)
         # OK, response looks fine:
         return response
 

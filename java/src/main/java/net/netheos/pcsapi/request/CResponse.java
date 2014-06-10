@@ -44,8 +44,8 @@ public class CResponse
     private final HttpEntity entity;
     private final String method;
     private final URI uri;
-    private String contentType;
-    private String reason;
+    private final String contentType;
+    private final String reason;
     private final Headers headers;
 
     public CResponse( HttpUriRequest request, HttpResponse response )
@@ -56,14 +56,17 @@ public class CResponse
         status = response.getStatusLine().getStatusCode();
         entity = response.getEntity();
 
+        String tmp = null;
         if ( entity != null && entity.getContentType() != null ) {
-            contentType = entity.getContentType().getValue();
+            tmp = entity.getContentType().getValue();
         }
+        contentType = tmp;
 
-        reason = response.getStatusLine().getReasonPhrase();
-        if ( reason == null || reason.isEmpty() ) {
-            reason = "No reason specified";
+        tmp = response.getStatusLine().getReasonPhrase();
+        if ( tmp == null || tmp.isEmpty() ) {
+            tmp = "No reason specified";
         }
+        reason = tmp;
         headers = new Headers( response.getAllHeaders() );
     }
 

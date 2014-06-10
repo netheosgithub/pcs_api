@@ -18,6 +18,7 @@ package net.netheos.pcsapi.providers.cloudme;
 
 import net.netheos.pcsapi.exceptions.CFileNotFoundException;
 import net.netheos.pcsapi.exceptions.CInvalidFileTypeException;
+import net.netheos.pcsapi.exceptions.CRetriableException;
 import net.netheos.pcsapi.exceptions.CStorageException;
 import net.netheos.pcsapi.models.CBlob;
 import net.netheos.pcsapi.models.CDownloadRequest;
@@ -31,14 +32,12 @@ import net.netheos.pcsapi.oauth.PasswordSessionManager;
 import net.netheos.pcsapi.request.ByteSourceBody;
 import net.netheos.pcsapi.request.CResponse;
 import net.netheos.pcsapi.request.CloudMeMultipartEntity;
-import net.netheos.pcsapi.request.Headers;
 import net.netheos.pcsapi.request.HttpRequestor;
 import net.netheos.pcsapi.request.RequestInvoker;
 import net.netheos.pcsapi.request.ResponseValidator;
 import net.netheos.pcsapi.storage.StorageBuilder;
 import net.netheos.pcsapi.storage.StorageProvider;
 import net.netheos.pcsapi.utils.PcsUtils;
-import net.netheos.pcsapi.utils.URIBuilder;
 import net.netheos.pcsapi.utils.XmlUtils;
 
 import org.apache.http.Header;
@@ -66,6 +65,11 @@ import java.util.Map;
 
 /**
  * Class that implements the CloudMe storage provider.
+ *
+ * https://www.cloudme.com/
+ *
+ * This provider uses http digest authentication and soap/xml payloads. Given simplicity of requests, they are built by
+ * simple string escape+concatenation instead of full blown XML dom serialization.
  */
 public class CloudMe
         extends StorageProvider<PasswordSessionManager>
@@ -609,7 +613,7 @@ public class CloudMe
                 }
 
                 String url = buildRestUrl( "documents" ) + cmParentFolder.getId() + '/' + cmBlob.getId() + "/1";
-                URI uri = new URIBuilder( URI.create( url ) ).build();
+                URI uri = URI.create( url );
 
                 HttpGet request = new HttpGet( uri );
                 for ( Header header : downloadRequest.getHttpHeaders() ) {
@@ -653,9 +657,6 @@ public class CloudMe
         String url = buildRestUrl( "documents" ) + cmParentFolder.getId();
         URI uri = URI.create( url );
         HttpPost request = new HttpPost( uri );
-
-        Headers headers = new Headers();
-        // TODO : Add Headers cf. Swift ?
 
         try {
             ByteSourceBody bsBody = new ByteSourceBody( ur.getByteSource(), path.getBaseName(), ur.getContentType() );
@@ -762,6 +763,7 @@ public class CloudMe
             int status = response.getStatus();
 
             if ( status >= 300 ) {
+                // Determining if error is retriable is not possible without parsing response:
                 throw buildCHttpException( response, path );
             }
             // Everything is OK
@@ -776,12 +778,6 @@ public class CloudMe
          */
         private CStorageException buildCHttpException( CResponse response, CPath cpath )
         {
-            StringBuilder sbHeaders = new StringBuilder();
-
-            for ( Header header : response.getHeaders() ) {
-                sbHeaders.append( header.getName() ).append( ": " ).append( header.getValue() ).append( '\n' );
-            }
-
             String stringResponse = response.asString();
 
             /**
@@ -803,58 +799,59 @@ public class CloudMe
              * </code>
              */
             String message = null;
+            boolean retriable = false;
             String ct = response.getContentType();
 
             if ( ct.contains( "application/xml" ) || ct.contains( "text/xml" ) ) {
-
                 Document dom = XmlUtils.getDomFromString( stringResponse );
-
                 NodeList faultCodeElements = dom.getElementsByTagNameNS( "*", "faultcode" );
-
                 if ( faultCodeElements.getLength() > 0 ) {
                     String faultCode = faultCodeElements.item( 0 ).getTextContent();
 
                     if ( faultCode.equals( "SOAP-ENV:Client" ) ) {
-
                         NodeList faultStringElements = dom.getElementsByTagNameNS( "*", "faultstring" );
                         if ( faultStringElements.getLength() > 0 ) {
+                            // In case we have no details:
                             message = faultStringElements.item( 0 ).getTextContent();
                         }
                     }
-
+                    // better message if possible:
                     NodeList errorElements = dom.getElementsByTagNameNS( "*", "error" );
-
                     if ( errorElements.getLength() > 0 ) {
                         Element errorElement = ( Element ) errorElements.item( 0 );
-
-                        if ( !errorElement.getAttribute( "code" ).equals( "" ) ) {
-
+                        if ( !errorElement.getAttribute( "code" ).isEmpty() ) {
                             String code = errorElement.getAttribute( "code" );
                             String reason = errorElement.getAttribute( "description" );
                             String number = errorElement.getAttribute( "number" );
                             message = "[" + code + " " + reason + " " + number + "] " + errorElement
                                     .getTextContent();
-
                             if ( cpath != null ) {
                                 message += " (" + cpath + ")";
                             }
-
                             if ( code.trim().equals( "404" ) ) {
                                 return new CFileNotFoundException( message, cpath );
-
                             }
                         }
                     }
+                    // These errors are not retriable, as we have received a well formed response
                 }
             } else {
                 // We haven't received a standard server error message ?!
+                // This can happen unlikely. Usually such errors are temporary.
                 LOGGER.error( "Unparsable server error: {}", stringResponse );
                 // Construct some message for exception:
                 message = PcsUtils.abbreviate( "Unparsable server error: " + stringResponse, 200 );
-                LOGGER.error( "Unparsable server error has headers: {}", sbHeaders );
+                LOGGER.error( "Unparsable server error has headers: {}", response.getHeaders() );
+                if ( response.getStatus() >= 500 ) {
+                    retriable = true;
+                }
             }
 
-            return PcsUtils.buildCStorageException( response, message, cpath );
+            CStorageException ret = PcsUtils.buildCStorageException( response, message, cpath );
+            if ( retriable ) {
+                ret = new CRetriableException( ret );
+            }
+            return ret;
         }
 
     }

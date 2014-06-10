@@ -20,7 +20,7 @@ import net.netheos.pcsapi.request.CResponse;
 import net.netheos.pcsapi.utils.PcsUtils;
 
 /**
- * Thrown when providers server answers non OK answers
+ * Thrown when provider server answers non OK answers.
  */
 public class CHttpException
         extends CStorageException
@@ -73,9 +73,9 @@ public class CHttpException
     @Override
     public String toString()
     {
-        return getClass().getSimpleName() + "{"
-               + "requestMethod='" + requestMethod + "', requestUri='" + requestUri
-               + "\', statusCode=" + status + ", reason='" + reason + "'}";
+        return getClass().getSimpleName() + "{ "
+               + requestMethod + " " + requestUri
+               + " [" + status + "/" + reason + "] " + getMessage() + " }";
     }
 
 }
