@@ -1,3 +1,4 @@
 You might want to put your credentials (UserCredentialsFileRepository) and app info (AppInfoFileRepository) files into this folder.
+See these classes for files formats.
 
 For test development and bootstrap purposes.

@@ -39,7 +39,7 @@ The unit tests are done using the *testng* library.
 ### Python
 An implementation exists for Python (tested on version 2.7).
 
-Python implementation has some dependencies, as specified in [requirements.txt](python/requirements.txt) (*pip* and *virtualenv* are recommended for installation).
+Python implementation has some dependencies, as specified in [setup.py](python/setup.py) (*pip* and *virtualenv* are recommended for installation).
 Basically, *requests* and *requests-oauthlib* are used for http requests and OAuth authentication, *pytest* is used for testing.
 
 

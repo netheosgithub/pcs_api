@@ -25,8 +25,17 @@ from .app_info import AppInfo
 class AppInfoFileRepository:
     """This class is a simple reader of applications informations
     from a plain text file with format:
-    provider_name_1,app_name_1 = json_object
-    provider_name_2,app_name_2 = json_object"""
+    provider_name_1.app_name_1 = json_object (on a single line)
+    provider_name_2.app_name_2 = json_object
+    ...
+    Empty json object is required even for non oauth2 providers.
+
+    Examples:
+    cloudme.login = {}
+    hubic.my_hubic_app = { "appId": "api_hubic_djfsdjkof5fds", "appSecret": "523T4GGEVfdgr", "scope":["usage.r","account.r","getAllLinks.r","credentials.r","activate.w","links.drw"], "redirectUrl": "http://localhost/" }
+
+    Sample code only: data is NOT encrypted in file.
+    """
 
     def __init__(self, data_filename):
         self._app_info = {}

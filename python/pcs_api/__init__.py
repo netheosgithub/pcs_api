@@ -15,11 +15,18 @@
 # limitations under the License.
 #
 
+__title__ = 'pcs_api'
 
-from . import bytes_io, cexceptions, models, storage, utils
+__version__ = "unknown"
+try:
+    from _version import __version__
+except ImportError:
+    # should not occur
+    pass
+
+from . import bytes_io, cexceptions, models, storage
 from .credentials import app_info, user_credentials
-from .cexceptions import (CStorageError, CRetriableError,
-                          CHttpError, CFileNotFoundError, CAuthenticationError)
+from .cexceptions import (CStorageError, CInvalidFileTypeError, CHttpError, CFileNotFoundError, CAuthenticationError)
 
 
 

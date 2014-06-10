@@ -31,6 +31,7 @@ from pcs_api.credentials.user_creds_file_repo import UserCredentialsFileReposito
 
 logger = logging.getLogger(__name__)
 
+
 # Command line options to configure functional tests:
 def pytest_addoption(parser):
     parser.addoption("--providers", default="all",
@@ -40,6 +41,7 @@ def pytest_addoption(parser):
     parser.addoption("--nb_thread", default="4", type=int,
                      help="Number of threads for multi-threads tests")
 
+
 def pytest_generate_tests(metafunc):
     """Generate test parameters according to command line options."""
     if 'storage' in metafunc.fixturenames:
@@ -47,16 +49,21 @@ def pytest_generate_tests(metafunc):
             providers_names = StorageFacade.get_registered_providers()
         else:
             providers_names = metafunc.config.option.providers.split(',')
-        print("Using providers names = ", providers_names)
-        # Instantiate one storage for each provider:
+        # Instantiate one storage for each provider, if possible:
         storages = []
-        for provider_name in providers_names:
-            storage = StorageFacade.for_provider(provider_name) \
-                .app_info_repository(apps_repo, None) \
-                .user_credentials_repository(user_credentials_repo, None) \
-                .build()
-            storages.append(storage)
+        if apps_repo:
+            logger.info("Using providers names = %r", providers_names)
+            for provider_name in providers_names:
+                storage = StorageFacade.for_provider(provider_name) \
+                    .app_info_repository(apps_repo, None) \
+                    .user_credentials_repository(user_credentials_repo, None) \
+                    .build()
+                storages.append(storage)
+        else:
+            # Missing apps_repo, etc. Functional tests can not run
+            logger.warn("No provider can be instantiated")
         metafunc.parametrize("storage", storages)
+
 
 @pytest.fixture
 def duration(request):
@@ -65,10 +72,12 @@ def duration(request):
     # sometimes val is a unicode here ?
     return int(val)
 
+
 @pytest.fixture
 def nb_thread(request):
     val = request.config.getoption("--nb_thread")
     return int(val)
+
 
 # TODO make this parametrizable
 logging.basicConfig(level=logging.DEBUG,
@@ -92,22 +101,31 @@ for name in ['requests.packages.urllib3',
 #requests_log.propagate = True
 #import httplib
 #httplib.HTTPConnection.debuglevel = 1
+
+logger.info("Testing with pcs_api version = %s", pcs_api.__version__)
+
 repository_dir_env_var_name = 'PCS_API_REPOSITORY_DIR'
 
-# Instantiate repositories:
+# Instantiate file repositories for app and users, if possible:
 file_repositories_folder = os.environ.get(repository_dir_env_var_name)
 if not file_repositories_folder:
     file_repositories_folder = '../repositories'
     logger.info('Environment variable %s is not defined: using %s',
                 repository_dir_env_var_name, file_repositories_folder)
-apps_repo = AppInfoFileRepository("%s/app_info_data.txt" % (file_repositories_folder,))
-user_credentials_repo = UserCredentialsFileRepository("%s/user_credentials_data.txt" % (file_repositories_folder))
+apps_repo_pathname = "%s/app_info_data.txt" % file_repositories_folder
+if os.path.exists(apps_repo_pathname):
+    apps_repo = AppInfoFileRepository("%s/app_info_data.txt" % file_repositories_folder)
+    user_credentials_repo = UserCredentialsFileRepository("%s/user_credentials_data.txt" % file_repositories_folder)
 
-logger.info("Functional tests will use Apps Repos: %r", apps_repo)
-logger.info("Functional tests will use UserCredentials Repos: %r", user_credentials_repo)
+    logger.info("Functional tests will use Apps Repos: %r", apps_repo)
+    logger.info("Functional tests will use UserCredentials Repos: %r", user_credentials_repo)
+else:
+    logger.warn('App info file repository not found for functional tests: %s'
+                '\nSet PCS_API_REPOSITORY_DIR environment variable', apps_repo_pathname)
+    logger.warn('No functional test will be run')
+    apps_repo = None
 
 TEST_FOLDER_PREFIX = '/pcsapi_tmp_'
 # For checking modification times: how much difference do we allow ?
 # TODO: one may use a NTP reference here, hoping providers are time synchronized
 TIME_ALLOWED_DELTA_s = 120
-

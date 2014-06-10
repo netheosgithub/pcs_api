@@ -27,8 +27,16 @@ from .user_credentials import UserCredentials
 class UserCredentialsFileRepository:
     """This class is a simple reader/writer of users credentialsapplications informations
     from a plain text file with format:
-    provider1.app_name_1.user_id1 = json_object
+    provider1.app_name_1.user_id1 = json_object (on a single line)
     provider1.app_name_1.user_id2 = json_object
+    ...
+
+    For login/password providers (cloudme): each line must be entered manually.
+    For OAuth2 providers (Dropbox...): do not build this file by hand, use samples/get_oauth_tokens.py
+
+    Examples:
+    cloudme.login.a_user_login = {"password":"the_user_password"}
+    hubic.my_hubic_app.user@example.com = {"access_token": "5GDFSFGERdfklermfkzel", "token_type": "Bearer", "expires_at": 1402416218.857214, "refresh_token": "tbjkerckjs123"}
 
     Sample code only: data is NOT encrypted in file, and this class does NOT scale if many users.
     This class is thread-safe, but NOT multi-processes safe.
