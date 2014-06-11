@@ -95,7 +95,7 @@ public class OAuth2AuthorizationActivity extends Activity {
             mWebView.loadUrl(authorizeWebUrl.toString());
 
         } catch (IOException ex) {
-            LOGGER.error("Error configuring PCSAPI", ex);
+            LOGGER.error("Error configuring PCS_API", ex);
             finish();
         }
     }

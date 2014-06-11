@@ -46,8 +46,8 @@ public class MenuActivity extends Activity implements View.OnClickListener
         mBtHubic = (Button) findViewById(R.id.btHubic);
         mBtHubic.setOnClickListener(this);
 
-        mBtCloudMe = (Button) findViewById(R.id.btCloudMe);
-        mBtCloudMe.setOnClickListener(this);
+        //mBtCloudMe = (Button) findViewById(R.id.btCloudMe);
+        //mBtCloudMe.setOnClickListener(this);
     }
 
     @Override

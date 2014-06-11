@@ -25,6 +25,7 @@ import net.netheos.pcsapi.models.RetryStrategy;
 import org.apache.http.client.HttpClient;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import net.netheos.pcsapi.utils.PcsUtils;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
@@ -120,6 +121,13 @@ public class StorageBuilder
             StorageProvider providerInstance = ( StorageProvider ) providerConstructor.newInstance( this );
             return providerInstance;
 
+        } catch ( InvocationTargetException itex ) {
+            Throwable cause = itex.getCause();
+            if ( cause instanceof RuntimeException ) {
+                throw ( RuntimeException ) cause;
+            }
+            // should not happen, providers constructors do not throw checked exceptions:
+            throw new UnsupportedOperationException( "Error instantiating the provider " + providerClass.getSimpleName(), itex );
         } catch ( Exception ex ) {
             throw new UnsupportedOperationException( "Error instantiating the provider " + providerClass.getSimpleName(), ex );
         }

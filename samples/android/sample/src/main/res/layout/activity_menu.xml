@@ -82,7 +82,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <Button
+        <!--Button
             android:id="@+id/btCloudMe"
             android:text="Cloud Me"
             android:tag="cloudme"
@@ -93,7 +93,7 @@
             android:textColor="#fff"
             android:padding="10dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content" /-->
         </LinearLayout>
 
 </LinearLayout>
