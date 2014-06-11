@@ -31,7 +31,7 @@ from ..cexceptions import CRetriableError
 logger = logging.getLogger(__name__)
 
 
-@register_provider
+#@register_provider
 class KanboxStorage(IStorageProvider):
     """FIXME : WORK IN PROGRESS"""
 

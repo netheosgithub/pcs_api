@@ -19,8 +19,8 @@ def read(*filenames, **kwargs):
 # Extract data from version file:
 version_py = read('pcs_api/_version.py')
 metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", version_py))
-
-long_description = read('readme_pypi.rst')
+readme = 'readme_pypi.rst'
+long_description = read(readme)
 
 setup(
     name='pcs-api',
@@ -39,8 +39,7 @@ setup(
     author_email='contact@netheos.net',
     description='A library that gives a uniform API to several personal cloud files storage providers (Dropbox, Google Drive...)',
     long_description=long_description,
-    packages=find_packages(exclude='test'),
-    #package_dir={'': 'pcs_api'},
+    packages=find_packages(),
     include_package_data=True,
     platforms='any',
     classifiers=[

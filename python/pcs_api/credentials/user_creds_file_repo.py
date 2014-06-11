@@ -57,6 +57,9 @@ class UserCredentialsFileRepository:
         with self._lock:
             if user_id is not None:
                 key = user_key(app_info, user_id)
+                if not key in self._user_creds:
+                    raise ValueError("No user credentials found for application %s and user_id '%s'"
+                                     % (app_info, user_id))
                 json_creds = self._user_creds[key]
             else:
                 # loop over all credentials

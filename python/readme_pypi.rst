@@ -13,10 +13,8 @@ API provides the following methods:
 -  upload/download/delete blob (a blob is a regular file)
 -  inquire about user and about used/available storage quota.
 
-pcs\_api is released under Apache License V2.0
-
 The API is available in many languages (Java, android and Python 2.7).
 
 Some samples programs showing how to use pcs\_api are availables in the repository ``samples`` directory.
 
-Please refer to https://github.com/netheosgithub/pcs_api for details.
+Refer to https://github.com/netheosgithub/pcs_api for more documentation.

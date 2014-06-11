@@ -18,6 +18,7 @@
 from __future__ import absolute_import, unicode_literals, print_function
 import logging
 import argparse
+import os
 
 # Required for providers registration :
 from pcs_api.providers import *
@@ -60,8 +61,28 @@ if cli_args.wire:
     requests_log.setLevel(logging.DEBUG)
     requests_log.propagate = True
 
-apps_repo = AppInfoFileRepository("../../repositories/app_info_data.txt")
-user_credentials_repo = UserCredentialsFileRepository("../../repositories/user_credentials_data.txt")
+repository_dir_env_var_name = 'PCS_API_REPOSITORY_DIR'
+
+# Try to instantiate file repositories for app and users:
+file_repositories_folder = os.environ.get(repository_dir_env_var_name)
+if not file_repositories_folder:
+    file_repositories_folder = '../../repositories'
+    print('Environment variable %s is not defined: using %s' %
+          (repository_dir_env_var_name, file_repositories_folder))
+
+apps_repo_pathname = "%s/app_info_data.txt" % file_repositories_folder
+if not os.path.exists(apps_repo_pathname):
+    print('Not found any application information repository file: ', apps_repo_pathname)
+    print('Refer to documentation and class AppInfoFileRepository to setup pcs_api for a quick test')
+    exit(1)
+apps_repo = AppInfoFileRepository(apps_repo_pathname)
+
+user_creds_pathname = "%s/user_credentials_data.txt" % file_repositories_folder
+if not os.path.exists(user_creds_pathname):
+    print('Not found any users credentials repository file: ', user_creds_pathname)
+    print('Refer to documentation and class UserCredentialsFileRepository to setup pcs_api for a quick test')
+    exit(1)
+user_credentials_repo = UserCredentialsFileRepository(user_creds_pathname)
 
 storage = StorageFacade.for_provider(cli_args.provider_name) \
                        .app_info_repository(apps_repo, cli_args.app_name) \
