@@ -3,10 +3,10 @@ pcs_api
 
 Personal Cloud Storages API: a library that abstract providers and gives a uniform API to several personal cloud storages providers.
 As of today, the following providers are supported:
-[Dropbox](https://www.dropbox.com)
-[hubiC](https://hubic.com)
-[Google Drive](http://www.google.com/drive/)
-[CloudMe](https://www.cloudme.com)
+[Dropbox](https://www.dropbox.com),
+[hubiC](https://hubic.com),
+[Google Drive](http://www.google.com/drive/),
+[CloudMe](https://www.cloudme.com).
 
 API provides the following methods:
 
@@ -37,7 +37,7 @@ The unit tests are done using the *testng* library.
 **WARNING:** the *aar* file can only be used with *Android Studio* ; it is not compatible with *Eclipse*.
 
 ### Python
-An implementation exists for Python (tested on version 2.7).
+An implementation exists for Python (tested on version 2.7), available as [a pypi package](https://pypi.python.org/pypi/pcs-api).
 
 Python implementation has some dependencies, as specified in [setup.py](python/setup.py) (*pip* and *virtualenv* are recommended for installation).
 Basically, *requests* and *requests-oauthlib* are used for http requests and OAuth authentication, *pytest* is used for testing.

@@ -17,12 +17,10 @@ def read(*filenames, **kwargs):
     return sep.join(buf)
 
 # Extract data from version file:
-version_py = open('python/pcs_api/_version.py').read()
+version_py = read('pcs_api/_version.py')
 metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", version_py))
 
-# Does not work : long_description = read(os.path.join(here, '..', 'README.md'))
-long_description = 'FIXME stub: refer to https://github.com/netheosgithub/pcs_api'
-
+long_description = read('readme_pypi.rst')
 
 setup(
     name='pcs-api',
@@ -39,10 +37,10 @@ setup(
         'python-dateutil>=2.2'
     ],
     author_email='contact@netheos.net',
-    description='A library that gives a uniform API to several personal cloud files storage providers.',
+    description='A library that gives a uniform API to several personal cloud files storage providers (Dropbox, Google Drive...)',
     long_description=long_description,
-    packages=find_packages('python'),
-    package_dir={'': 'python'},
+    packages=find_packages(exclude='test'),
+    #package_dir={'': 'pcs_api'},
     include_package_data=True,
     platforms='any',
     classifiers=[
