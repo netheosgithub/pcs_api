@@ -125,7 +125,6 @@ else:
     logger.warn('No functional test will be run')
     apps_repo = None
 
-TEST_FOLDER_PREFIX = '/pcsapi_tmp_'
 # For checking modification times: how much difference do we allow ?
 # TODO: one may use a NTP reference here, hoping providers are time synchronized
 TIME_ALLOWED_DELTA_s = 120

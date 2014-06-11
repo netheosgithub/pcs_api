@@ -82,9 +82,9 @@ public class StorageProviderFactory
         File appRepoFile = new File( repository, "app_info_data.txt" );
 
         if ( !appRepoFile.exists() ) {
-            LOGGER.warn( "No app info file found for functional tests."
+            LOGGER.warn( "No app info file found for functional tests: {}"
                          + " Set PCS_API_REPOSITORY_DIR environment variable,"
-                         + " or set pcsapiRepositoryDir system property" );
+                         + " or set pcsapiRepositoryDir system property", appRepoFile );
             LOGGER.warn( "No functional test will be run" );
             return Collections.EMPTY_LIST; // list of providers to be tested
         }

@@ -3,14 +3,18 @@ OAuth2
 
 ### Details regarding Oauth2 and repositories
 
-Most providers use the OAuth2 protocol for authorizing your application to access files. See online tutorials for OAuth2 workflows description. pcs_api supports only web application workflow, so that authorization is persistent (thanks to refresh tokens).
+Most providers use the OAuth2 protocol for authorizing your application to access files.
+See online tutorials for OAuth2 workflows description.
+pcs_api supports only web application workflow, so that authorization is persistent (thanks to refresh tokens).
 
 - At first an application must be registered provider side.
 - Copy id and secret given by provider (and also scope) to populate your AppInfoRepository
-- then OAuth tokens must be fetched from provider OAuth server, to retrieve refresh tokens. This implies a user manual agreement. A bootstrap utility is provided to help this step (see hereafter)
+- then OAuth tokens must be fetched from provider OAuth server, to retrieve refresh tokens.
+This implies a user manual agreement. A bootstrap utility is provided to help this step (see hereafter)
 
 For quick tests, two repositories implementations are provided: AppInfoFileRepository and UserCredentialsFileRepository.
-**These are rough and not suitable for production**. They store secrets in plain text files and do not scale to more than 10 users (moreover, they are not multi-process safe).
+**These are rough and not suitable for production**. They store secrets in plain text files and do not scale to more
+than 10 users (moreover, they are not multi-process safe).
 
 Application developer is expected to provide better implementations (for example relying on a database with credentials ciphering).
 
@@ -35,7 +39,10 @@ hubic.mytestapp = { "appId": "xxxx", "appSecret": "yyyy",
                     "redirectUrl": "http://localhost/" }
 ```
 
-Example for a Dropbox application: with Dropbox the code is displayed into web page, instead of being in redirect URL. Dropbox also does not have any scope in OAuth2 exchanges. Scope is required however by pcs_api. For full access, "dropbox" permission must be specified as scope ; for single folder, "sandbox" permission must be specified (remember that scope is a list of permissions).
+Example for a Dropbox application: with Dropbox the code is displayed into web page, instead of being in redirect URL.
+Dropbox also does not have any scope in OAuth2 exchanges. Scope is required however by pcs_api.
+For full access, "dropbox" permission must be specified as scope ; for single folder, "sandbox" permission must be specified
+(remember that scope is a list of permissions).
 
 ```
 dropbox.mydropboxapp = { "appId": "xxxx", "appSecret": "yyyy", "scope": ["sandbox"] }
@@ -72,8 +79,12 @@ bootstrapper.getUserCredentials(redirectUrl);
 ```
 
 Basically user is asked to perform a manual authorization on the URL given by the tool.
-After authorization, user must copy back full redirect url (or only the code displayed in web page) into python (or Java) tool in order to finish the code workflow (code is exchanged against access_token, and also refresh_token). Access token is then used to get user_id, and lastly user credentials are saved in to repository. From now on, authorization is granted to pcs_api for quite a long time (provider dependent).
+After authorization, user must copy back full redirect url (or only the code displayed in web page) into python (or Java) tool
+in order to finish the code workflow (code is exchanged against access_token, and also refresh_token).
+Access token is then used to get user_id, and lastly user credentials are saved in to repository.
+From now on, authorization is granted to pcs_api for quite a long time (provider dependent).
 
-Note for Google Drive (this should not occur anymore): sometimes google does not give any refresh token. For tests purposes, it is recommended to go to google's user security page and revoke authorization for the application.
+Note for Google Drive (this should not occur anymore): sometimes google does not give any refresh token.
+For tests purposes, it is recommended to go to google's user security page and revoke authorization for the application.
 
 As a proof of concept, the sample application for Android shows how this can be performed in an application, by embedding a webview.

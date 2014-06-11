@@ -37,7 +37,7 @@ public class MiscUtils
     private static final Logger LOGGER = LoggerFactory.getLogger( MiscUtils.class );
     
     private static final long TIME_ALLOWED_DELTA_SEC = 120L;
-    private static final String TEST_FOLDER_PREFIX = "/pcsapi_tmptest_";
+    private static final String TEST_FOLDER_PREFIX = "/pcs_api_tmptest_";
     
     private MiscUtils()
     {

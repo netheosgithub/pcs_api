@@ -97,7 +97,7 @@ public class BasicTest
     public void setUp()
             throws Exception
     {
-        tmpDir = File.createTempFile( "pcsapi", ".dir" );
+        tmpDir = File.createTempFile( "pcs_api", ".dir" );
         FileUtils.deleteQuietly( tmpDir );
         tmpDir.mkdirs();
     }

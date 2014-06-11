@@ -28,7 +28,7 @@ import dateutil
 
 from pcs_api.models import CPath
 
-TEST_FOLDER_PREFIX = '/pcsapi_tmptest_'
+TEST_FOLDER_PREFIX = '/pcs_api_tmptest_'
 # For checking modification times : how much difference do we allow ?
 # TODO : one may use a NTP reference here, hoping providers are time synchronized
 TIME_ALLOWED_DELTA_s = 120

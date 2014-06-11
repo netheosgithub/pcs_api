@@ -162,7 +162,7 @@ class ProgressByteSource(ByteSource):
     """A byte source that notifies a ProgressListener ;
     data is read from underlying ByteSource.
 
-    For pcsapi internal use only; use CUploadRequest.progress_listener(pl) instead."""
+    For pcs_api internal use only; use CUploadRequest.progress_listener(pl) instead."""
 
     def __init__(self, byte_source, progress_listener):
         self._byte_source = byte_source
@@ -479,7 +479,7 @@ class MemoryByteSink(ByteSink):
 class ProgressByteSink(ByteSink):
     """A byte sink that notifies a ProgressListener ; data is written to underlying ByteSink
 
-    For pcsapi internal use only; use CDownloadRequest.progress_listener(pl) instead."""
+    For pcs_api internal use only; use CDownloadRequest.progress_listener(pl) instead."""
     def __init__(self, byte_sink, progress_listener):
         self._byte_sink = byte_sink
         self._progress_listener = progress_listener

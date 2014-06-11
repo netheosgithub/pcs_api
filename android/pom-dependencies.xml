@@ -5,24 +5,24 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.netheos</groupId>
-    <artifactId>pcsapi-android-dependency-pom</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <description>Just a utility pom to get dependencies needed by pcsapi-android in your local repository</description>
+    <artifactId>pcs-api-android-dependency-pom</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
+    <description>Just a utility pom to get dependencies needed by pcs-api-android in your local repository</description>
 
     <properties>
-        <net.netheos.pcsapi.version>1.0-SNAPSHOT</net.netheos.pcsapi.version>
+        <net.netheos.pcs-api.version>1.0.1-SNAPSHOT</net.netheos.pcs-api.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>net.netheos</groupId>
-            <artifactId>pcsapi</artifactId>
-            <version>${net.netheos.pcsapi.version}</version>
+            <artifactId>pcs-api-java</artifactId>
+            <version>${net.netheos.pcs-api.version}</version>
         </dependency>
         <dependency>
             <groupId>net.netheos</groupId>
-            <artifactId>pcsapi</artifactId>
-            <version>${net.netheos.pcsapi.version}</version>
+            <artifactId>pcs-api-java</artifactId>
+            <version>${net.netheos.pcs-api.version}</version>
             <classifier>tests</classifier>
         </dependency>
     </dependencies>

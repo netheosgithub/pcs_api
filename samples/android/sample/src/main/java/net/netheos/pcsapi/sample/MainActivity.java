@@ -64,15 +64,15 @@ public class MainActivity extends Activity
         File dir = getDir("repository", Context.MODE_PRIVATE);
 
         if (mProviderName.equals("cloudme")){
-            mCredentialsFile = new File(Environment.getExternalStoragePublicDirectory("pcsapi"), "user_credentials_data.txt");
+            mCredentialsFile = new File(Environment.getExternalStoragePublicDirectory("pcs_api"), "user_credentials_data.txt");
         } else {
             mCredentialsFile = new File(dir, "credentials.conf");
         }
 
         // This may be quite tricky, depending on phones...
-        mAppInfoFile = new File(Environment.getExternalStoragePublicDirectory("pcsapi"), "app_info_data.txt");
+        mAppInfoFile = new File(Environment.getExternalStoragePublicDirectory("pcs_api"), "app_info_data.txt");
         if (!mAppInfoFile.exists()) {
-            mAppInfoFile = new File("/storage/extSdCard/pcsapi", "app_info_data.txt");
+            mAppInfoFile = new File("/storage/extSdCard/pcs_api", "app_info_data.txt");
         }
 
         if (!mCredentialsFile.exists()) {

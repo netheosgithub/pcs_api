@@ -1,1 +1,1 @@
-include ':pcsapi-android'
+include ':pcs-api-android'

@@ -26,13 +26,14 @@ The API has been developped in many languages (Java, android and Python). Some s
 An implementation exists for Java (1.6+). It is also compliant with android API 8+.
 The base library uses a maven artefact with the following dependencies:
 
-- *httpclient* for the network access
+- *httpclient* for the network access (already provided on android platform)
+- *json* to parse the JSON server responses (already provided on android platform)
 - *slf4j* for the logging
-- *json* to parse the JSON server responses
 
-The unit tests are done using the *testng* library.
+The unit tests are done using the *JUnit4* library (JUnit3 on android).
 
-[Android Studio](http://developer.android.com/sdk/installing/studio.html) has been used to build the android library. It generates an archives `aar` which can be used in an application. This works as a Maven artefact.
+[Android Studio](http://developer.android.com/sdk/installing/studio.html) has been used to build the android library.
+It generates an archives `aar` which can be used in an application. This works as a Maven artefact.
 
 **WARNING:** the *aar* file can only be used with *Android Studio* ; it is not compatible with *Eclipse*.
 
@@ -53,7 +54,7 @@ See this [page](docs/build.md)
 
 Features
 --------
-pcsapi can handle several authentications types:
+pcs_api can handle several authentications types:
 
 - [OAuth2](docs/oauth2.md) (used by Dropbox, hubiC, Google Drive)
 - Login / password (CloudMe uses http digest authentication)

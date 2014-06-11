@@ -161,7 +161,7 @@ public class StorageBuilder
      * Sets a HTTP client that extends org.apache.http.client.HttpClient. Allows users to use a custom HTTP client with
      * custom parameters.
      *
-     * @param httpClient The http client to use for issuing requests. This client settings may be modified by pcsapi,
+     * @param httpClient The http client to use for issuing requests. This client settings may be modified by pcs_api,
      * thus it is recommended to use a dedicated client for each provider.
      * @return The builder
      */
@@ -194,7 +194,7 @@ public class StorageBuilder
     private static HttpClient createDefaultClient()
     {
         if ( PcsUtils.ANDROID ) {
-            return android.net.http.AndroidHttpClient.newInstance( "pcsapi" );
+            return android.net.http.AndroidHttpClient.newInstance( "pcs-api" );
 
         } else {
             HttpParams params = new BasicHttpParams();

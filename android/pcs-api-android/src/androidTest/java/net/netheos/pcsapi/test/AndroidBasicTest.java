@@ -33,7 +33,10 @@ import net.netheos.pcsapi.storage.StorageBuilder;
 import net.netheos.pcsapi.storage.StorageFacade;
 
 import java.io.File;
+import net.netheos.pcsapi.credentials.AppInfoRepository;
 import org.junit.internal.AssumptionViolatedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Android does not support test ng (nor junit4), only junit3.
@@ -41,6 +44,8 @@ import org.junit.internal.AssumptionViolatedException;
  * This is an adapter class.
  */
 public class AndroidBasicTest extends InstrumentationTestCase {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AndroidBasicTest.class);
 
     @Override
     protected void setUp() throws Exception {
@@ -65,16 +70,22 @@ public class AndroidBasicTest extends InstrumentationTestCase {
     }
 
     private void testProvider(String name) throws Exception {
-        File sdCard = new File(Environment.getExternalStorageDirectory(), "pcsapi");
+        File sdCard = new File(Environment.getExternalStorageDirectory(), "pcs_api");
         sdCard.mkdirs();
 
-        AppInfoFileRepository appRepo = new AppInfoFileRepository(new File(sdCard, "app_info_data.txt"));
+        File appRepoFile = new File(sdCard, "app_info_data.txt");
+        if ( ! appRepoFile.exists()) {
+            LOGGER.warn( "No app info file found for functional tests: {}", appRepoFile );
+            LOGGER.warn( "No functional test will be run for provider {}", name );
+            return;
+        }
+        AppInfoRepository appRepo = new AppInfoFileRepository(appRepoFile);
         UserCredentialsRepository credentialsRepo = new UserCredentialsFileRepository(new File(sdCard, "user_credentials_data.txt"));
 
         StorageBuilder builder = StorageFacade.forProvider(name);
         builder.setAppInfoRepository(appRepo, appRepo.get(name).getAppName());
         builder.setUserCredentialsRepository(credentialsRepo, null);
-        builder.setHttpClient(AndroidHttpClient.newInstance("pcsapi-android-test", getInstrumentation().getContext()));
+        builder.setHttpClient(AndroidHttpClient.newInstance("pcs-api-android-test", getInstrumentation().getContext()));
         IStorageProvider storage = builder.build();
 
         BasicTest mTest = new BasicTest(storage);

@@ -49,10 +49,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Sample using the "dropbox" provider.
  *
- * To execute this class, a file named "app_info_data.txt" must be written in the "repositories" directory at the Git
- * root folder. This file is described in the documentation
- * https://github.com/Netheos/pcs_api/blob/master/docs/oauth2.md#appinfofilerepository. User credentials are written in
- * a file in current directory : "user_credentials_data.txt"
+ * To execute properly, a file named "app_info_data.txt" must be written in the "repositories" directory at the Git
+ * root folder (or in another folder defined by environment variable PCS_API_REPOSITORY_DIR).
+ * This file is described in the documentation
+ * https://github.com/netheosgithub/pcs_api/blob/master/docs/oauth2.md#appinfofilerepository.
  *
  * This class is only for test use. DO NOT use it in a production environment.
  */
@@ -61,17 +61,29 @@ public class Main
 
     private static final Logger LOGGER = LoggerFactory.getLogger( Main.class );
 
-    private static final String PROVIDER_NAME = "googledrive";
+    private static final String PROVIDER_NAME = "dropbox";
 
     public static void main( String[] args )
     {
         try {
-            // Get the application repository (containing the applications informations)
-            File repository = new File( "../../repositories" );
-            AppInfoRepository appInfoRepo = new AppInfoFileRepository( new File( repository, "app_info_data.txt" ) );
+            String path = System.getenv( "PCS_API_REPOSITORY_DIR" );
+            if ( path == null ) {
+                path = "../repositories";
+            }
 
-            // Get the application repository (containing the user credentials)
-            File credsFile = new File( repository, "user_credentials_data.txt" );
+            File repositoriesFolder = new File( path );
+            File appRepoFile = new File( repositoriesFolder, "app_info_data.txt" );
+            if ( !appRepoFile.exists() ) {
+                LOGGER.warn( "No app info file found: {}"
+                             + " Please set PCS_API_REPOSITORY_DIR environment variable", appRepoFile );
+                System.exit( 1 );
+            }
+
+            // Get the application repository (containing the applications informations)
+            AppInfoRepository appInfoRepo = new AppInfoFileRepository( appRepoFile );
+
+            // Get the user credentials repository (containing passwords and OAuth2 tokens)
+            File credsFile = new File( repositoriesFolder, "user_credentials_data.txt" );
             UserCredentialsRepository userCredentialsRepo = new UserCredentialsFileRepository( credsFile );
 
             // Build the provider

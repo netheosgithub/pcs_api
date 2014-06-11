@@ -84,7 +84,7 @@ public class OAuth2AuthorizationActivity extends Activity {
             mProvider = StorageFacade.forProvider(providerName)
                     .setAppInfoRepository(mAppRepo, mAppInfo.getAppName())
                     .setUserCredentialsRepository(mCredentialsRepo, null)
-                    .setHttpClient(AndroidHttpClient.newInstance("pcsapi-android-test", this))
+                    .setHttpClient(AndroidHttpClient.newInstance("pcs-api-android-test", this))
                     .setForBootstrapping(true)
                     .build();
 

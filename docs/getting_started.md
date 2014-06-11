@@ -11,13 +11,13 @@ The better way to use the library is creating a maven (version 3+) project. Just
 ```xml
 <dependency>
     <groupId>net.netheos</groupId>
-    <artifactId>pcsapi</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>pcs-api-java</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
 </dependency>
 ```
-If the application do not uses maven, the following jars must be linked:
+If the application does not uses maven, the following jars must be linked:
 
-* pcsapi-1.0-SNAPSHOT.jar
+* pcs-api-java-1.0.1-SNAPSHOT.jar
 * httpclient-4.2.6.jar
 * httpcore-4.2.6.jar
 * json-20131018.jar
@@ -26,15 +26,18 @@ If the application do not uses maven, the following jars must be linked:
 
 ###Android
 
-Android Studio is needed to build an android application. It can be downloaded [here](http://developer.android.com/sdk/installing/studio.html). To use the library, just add the dependency in the `appname.gradle` file:
+Android Studio is needed to build an android application.
+It can be downloaded [here](http://developer.android.com/sdk/installing/studio.html).
+To use the library, just add the dependency in the `appname.gradle` file:
 ```gradle
-compile 'net.netheos:pcsapi-android:1.0-SNAPSHOT'
+compile 'net.netheos:pcs-api-android:1.0.1-SNAPSHOT'
 ```
 
 
 ##Using the library
 
-Once everything is setup (OAuth2 refresh token and credentials repositories, see hereafter), instantiating a provider storage facade object is done with the following code:
+Once everything is setup (OAuth2 refresh token and credentials repositories, see hereafter),
+instantiating a provider storage facade object is done with the following code:
 
 In Python:
 ```python
@@ -55,9 +58,14 @@ In Java:
                .build();
 ```
 
-For android, it is useful to define a custom HttpClient using [AndroidHttpClient](http://developer.android.com/reference/android/net/http/AndroidHttpClient.html) to be compliant with the platform. It can be setted by calling the method setHttpClient as decribed in the previous example).
+For android, it is useful to define a custom HttpClient using
+[AndroidHttpClient](http://developer.android.com/reference/android/net/http/AndroidHttpClient.html)
+to be compliant with the platform.
+The client to be used can be set by calling the `setHttpClient()` method, as decribed in the previous example).
 
-From there storage gives you access to remote files. All remote paths are handled by CPath object. Folders separator is always / (anti-slashs are forbidden in CPath).
+From there storage gives you access to remote files.
+All remote paths are handled by CPath object (a wrapper class containing remote pathname). A CPath is always absolute,
+and uses slash separators between folders (anti-slashs are forbidden in CPath).
 
 A remote folder is handled as a CFolder object, and a remote regular file is handled by a CBlob object. Both classes inherit CFile.
 
@@ -68,7 +76,7 @@ In Python
 
    root_folder_content = storage.list_root_folder()
    # root_folder_content is a dict
-   # keys are files paths, values are CFolder or CBlob providing details (length, content-type...)
+   # keys are files paths, values are CFolder or CBlob objects for getting details (length, content-type...)
    print("Root folder content = ", root_folder_content)
 
    # Create a new folder:
@@ -85,7 +93,7 @@ In Python
    download_request = CDownloadRequest(bpath, FileByteSink('my_file_back.txt'))
    storage.download(download_request)
 
-   # delete remote folder:
+   # delete remote folder: (always recursive)
    storage.delete(fpath)
 ```
 Refer to IStorageProvider interface docstrings for reference.
@@ -113,7 +121,7 @@ In Java
    CDownloadRequest downloadRequest = new CDownloadRequest(bpath, new FileByteSink("my_file_back.txt"));
    storage.download(downloadRequest);
 
-   // delete remote folder:
+   // delete remote folder: (always recursive)
    storage.delete(fpath);
 ```
 
@@ -121,7 +129,10 @@ See `samples` directory and functional tests for other code examples (running th
 
 Raw storage object is thread safe.
 
-Listing a folder (or inquiring blob details) will return None (or null) if remote object does not exist. Also deleting a non-existing file is not an error but merely returns false. However exceptions are raised if trying to download a non-existing file, or if creating a folder but a blob already exists at the same path.
+Listing a folder (or inquiring blob details) will return None (or null) if remote object does not exist.
+Also deleting a non-existing file is not an error but merely returns false.
+However exceptions are raised if trying to download a non-existing file,
+or if creating a folder but a blob already exists at the same path.
 
 Now what are these objects required for building storage facade: app_info_repo, users_credentials_repo?
 These objects are used to manage secrets : application secrets, and users secrets.
@@ -161,4 +172,4 @@ void save(UserCredentials<?> userCredentials) throws IOException;  // persists t
 
 Note: if repository contains a single user for given application, the *user id* may be omitted.
 
-See [OAuth2](oauth2.md) page to better understand these objects. 
+See [OAuth2](oauth2.md) page to better understand these objects.

@@ -1,6 +1,6 @@
 apply plugin: 'android-library'
 
-archivesBaseName = 'pcsapi-android'
+archivesBaseName = 'pcs-api-android'
 group = rootProject.group
 version = rootProject.version
 
@@ -28,14 +28,14 @@ android {
 
 dependencies {
     compile 'org.slf4j:slf4j-android:1.7.6'
-    compile('net.netheos:pcsapi:1.0-SNAPSHOT') {
+    compile('net.netheos:pcs-api-java:1.0.1-SNAPSHOT') {
         exclude group: 'org.json', module: 'json'
         exclude group: 'org.apache.httpcomponents', module:'httpclient'
         exclude group: 'org.apache.httpcomponents', module:'httpcore'
         exclude group: 'org.slf4j', module:'slf4j-api'
     }
 
-    androidTestCompile 'net.netheos:pcsapi:1.0-SNAPSHOT:tests@jar'
+    androidTestCompile 'net.netheos:pcs-api-java:1.0.1-SNAPSHOT:tests@jar'
     androidTestCompile 'junit:junit:4.11'
     androidTestCompile 'commons-io:commons-io:2.4'
 }

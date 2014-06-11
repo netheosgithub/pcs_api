@@ -48,7 +48,7 @@ public class BytesIOTest
     public void setUp()
             throws Exception
     {
-        tmpDir = File.createTempFile( "pcsapi", ".dir" );
+        tmpDir = File.createTempFile( "pcs_api", ".dir" );
         tmpDir.delete();
         tmpDir.mkdirs();
     }

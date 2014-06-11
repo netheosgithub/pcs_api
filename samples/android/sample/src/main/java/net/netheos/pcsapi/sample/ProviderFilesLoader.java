@@ -52,7 +52,8 @@ import java.util.List;
 /**
  * Load all files from a given provider.
  * To execute this class, a file named "app_info_data.txt" must be written in the application sandbox.
- * This file is described in the documentation https://github.com/Netheos/pcs_api/blob/master/docs/oauth2.md#appinfofilerepository.
+ * This file is described in the documentation
+ * https://github.com/netheosgithub/pcs_api/blob/master/docs/oauth2.md#appinfofilerepository.
  *
  * This class is only for test use. DO NOT use it in a production environment.
  */
