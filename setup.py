@@ -25,9 +25,10 @@ long_description = 'FIXME stub: refer to https://github.com/netheosgithub/pcs_ap
 
 
 setup(
-    name='pcs_api',
+    name='pcs-api',
     version=metadata['version'],
     url='https://github.com/netheosgithub/pcs_api',
+    download_url='https://github.com/netheosgithub/pcs_api/releases',
     license='Apache Software License V2.0',
     author='Netheos',
     tests_require=['pytest>=2.5.2'],
