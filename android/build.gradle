@@ -1,8 +1,21 @@
-group = 'net.netheos'
-version = '1.0.1-SNAPSHOT'
+//ext {
+  GROUP='net.netheos'
+  VERSION_NAME='1.0.1-SNAPSHOT'
+
+  POM_DESCRIPTION='A lightweight library that abstract providers and gives a uniform API to several personal cloud storages providers'
+  POM_URL='https://github.com/netheosgithub/pcs_api'
+  POM_SCM_URL='https://github.com/netheosgithub/pcs_api.git'
+  POM_SCM_CONNECTION='scm:git:git@github.com:netheosgithub/pcs_api.git'
+  POM_SCM_DEV_CONNECTION='scm:git:git@github.com:netheosgithub/pcs_api.git'
+  POM_LICENCE_NAME='The Apache Software License, Version 2.0'
+  POM_LICENCE_URL='http://www.apache.org/licenses/LICENSE-2.0.txt'
+  POM_LICENCE_DIST='repo'
+  POM_DEVELOPER_ID='netheosgithub'
+  POM_DEVELOPER_NAME='Netheos'
+//}
 
 println('Project name : ' + project.name)
-println('Project version : ' + project.version)
+println('Project version : ' + project.VERSION_NAME)
 println('Sub(s) project(s) : ' + project.childProjects)
 
 buildscript {
@@ -14,7 +27,13 @@ buildscript {
     }
 }
 
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == false
+}
+
 allprojects {
+    version = project.VERSION_NAME
+    group = project.GROUP
     apply plugin: 'maven'
 
     repositories {
@@ -30,4 +49,21 @@ allprojects {
         }
     }
 
+}
+
+import org.gradle.plugins.signing.Sign
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.allTasks.any { it instanceof Sign && isReleaseBuild() }) {
+        keyId = 'EA2091B8'
+        // Use Java 6's console to read gpg password from the console
+        Console console = System.console()
+        console.printf "\n\nWe have to sign some things in this build.\n\nPlease enter your PGP key password for id: " + keyId+".\n"
+
+        def password = console.readPassword("PGP Private Key Password: ")
+        allprojects { ext."signing.keyId" = keyId }
+        allprojects { ext."signing.password" = password }
+
+        console.printf "\nThanks.\n\n"
+    }
 }

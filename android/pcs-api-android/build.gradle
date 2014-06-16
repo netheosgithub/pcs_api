@@ -3,6 +3,9 @@ apply plugin: 'android-library'
 archivesBaseName = 'pcs-api-android'
 group = rootProject.group
 version = rootProject.version
+POM_NAME='pcs-api-android'
+POM_ARTIFACT_ID='pcs-api-android'
+POM_PACKAGING='aar'
 
 android {
     compileSdkVersion 19
@@ -28,14 +31,16 @@ android {
 
 dependencies {
     compile 'org.slf4j:slf4j-android:1.7.6'
-    compile('net.netheos:pcs-api-java:1.0.1-SNAPSHOT') {
+    compile('net.netheos:pcs-api-java:1.0.1') {
         exclude group: 'org.json', module: 'json'
         exclude group: 'org.apache.httpcomponents', module:'httpclient'
         exclude group: 'org.apache.httpcomponents', module:'httpcore'
         exclude group: 'org.slf4j', module:'slf4j-api'
     }
 
-    androidTestCompile 'net.netheos:pcs-api-java:1.0.1-SNAPSHOT:tests@jar'
+    androidTestCompile 'net.netheos:pcs-api-java:1.0.1:tests@jar'
     androidTestCompile 'junit:junit:4.11'
     androidTestCompile 'commons-io:commons-io:2.4'
 }
+
+apply from: '../maven_push.gradle'
