@@ -16,6 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version.pcs-api-java>1.0.1-SNAPSHOT</version.pcs-api-java>
     </properties>
     
     <build>
@@ -45,7 +46,7 @@
         <dependency>
             <groupId>net.netheos</groupId>
             <artifactId>pcs-api-java</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>${version.pcs-api-java}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
