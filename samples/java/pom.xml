@@ -16,7 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.pcs-api-java>1.0.1</version.pcs-api-java>
+        <version.pcs-api-java>1.1-SNAPSHOT</version.pcs-api-java>
     </properties>
     
     <build>
