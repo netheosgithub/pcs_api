@@ -1,7 +1,7 @@
 Build
 =====
 
-This page will describe the way to build pcs_api
+This page describes how to build pcs_api and sample applications.
 
 Java
 ----
@@ -76,12 +76,16 @@ The pcs_api library must be built for java before this step.
 Open a shell and set the current directory to `samples/java` and build using maven:
 ```bash
 cd samples/java
-mvn clean install
-mvn exec:java
+mvn clean package
 ```
 
 Location of credentials repository folder files is defined by an environment variable
-(refer to code for actual values).
+(refer to code for actual values). Running sample can be achieved with maven:
+
+```bash
+export PCS_API_REPOSITORY_DIR=/path/to/your/repositories/folder
+mvn exec:java
+```
 
 Android sample
 --------------

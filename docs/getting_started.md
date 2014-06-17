@@ -3,21 +3,31 @@ Getting started
 
 ##Create an application
 
-Before creating any application, you must build the library. This process is described in this [page](build.md);
+Before creating any application, you may build the library. This process is described in this [page](build.md).
+
+Otherwise, add a reference to pre-built releases in your project dependencies. Releases are available on maven central
+for Java and Android, and pypi for Python.
+
+###Python
+
+Use of `pip` is recommended. Add the following dependency in `requirements.txt`:
+```
+pcs-api>=1.0
+```
 
 ###Java
 
-The better way to use the library is creating a maven (version 3+) project. Just add the dependency in the `pom.xml` file:
+The simplest way to use the library is creating a maven (version 3+) project. Just add the dependency in the `pom.xml` file:
 ```xml
 <dependency>
     <groupId>net.netheos</groupId>
     <artifactId>pcs-api-java</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 If the application does not uses maven, the following jars must be linked:
 
-* pcs-api-java-1.0.1-SNAPSHOT.jar
+* pcs-api-java-1.0.1.jar
 * httpclient-4.2.6.jar
 * httpcore-4.2.6.jar
 * json-20131018.jar
@@ -30,8 +40,11 @@ Android Studio is needed to build an android application.
 It can be downloaded [here](http://developer.android.com/sdk/installing/studio.html).
 To use the library, just add the dependency in the `appname.gradle` file:
 ```gradle
-compile 'net.netheos:pcs-api-android:1.0.1-SNAPSHOT'
+compile 'net.netheos:pcs-api-android:1.0.1'
 ```
+
+Note that Android platform already provides the http client and json jars. The platform agnostic logging API slf4j
+is fullfilled by `slf4j-android`. The proper dependencies are declared in pcs-api-android pom.
 
 
 ##Using the library
@@ -64,12 +77,13 @@ to be compliant with the platform.
 The client to be used can be set by calling the `setHttpClient()` method, as decribed in the previous example).
 
 From there storage gives you access to remote files.
-All remote paths are handled by CPath object (a wrapper class containing remote pathname). A CPath is always absolute,
-and uses slash separators between folders (anti-slashs are forbidden in CPath).
+All remote paths are handled by `CPath` objects (a wrapper class containing a pathname of a remote file).
+A CPath is always absolute, and uses slash separators between folders (anti-slashs are forbidden in CPath).
 
-A remote folder is handled as a CFolder object, and a remote regular file is handled by a CBlob object. Both classes inherit CFile.
+A remote folder is handled as a `CFolder` object, and a remote regular file is handled by a `CBlob` object.
+Both classes inherit `CFile`.
 
-In Python
+In Python:
 ```python
    quota = storage.get_quota()
    print('User quota is:',quota)
@@ -98,7 +112,7 @@ In Python
 ```
 Refer to IStorageProvider interface docstrings for reference.
 
-In Java
+In Java:
 ```java
    CQuota quota = storage.getQuota();
    System.out.println("User quota is: " + quota);
@@ -127,7 +141,7 @@ In Java
 
 See `samples` directory and functional tests for other code examples (running these requires some setup though).
 
-Raw storage object is thread safe.
+Storage object is thread safe.
 
 Listing a folder (or inquiring blob details) will return None (or null) if remote object does not exist.
 Also deleting a non-existing file is not an error but merely returns false.
@@ -135,41 +149,41 @@ However exceptions are raised if trying to download a non-existing file,
 or if creating a folder but a blob already exists at the same path.
 
 Now what are these objects required for building storage facade: app_info_repo, users_credentials_repo?
-These objects are used to manage secrets : application secrets, and users secrets.
+These objects are used to manage secrets: application secrets, and users secrets.
 
-app_info_repo is an AppInfoRepository object (interface).
-This object is read-only, it stores applications information: appId, appSecret, scope, redirect url, etc.
+app_info_repo is an `AppInfoRepository` object (interface).
+This object is read-only, it stores applications OAuth information: appId, appSecret, scope, redirect url, etc.
 The single method of AppInfoRepository is:
 
-In Python
+In Python:
 ```python
 get(provider_name, app_name=None)  # returns an AppInfo object.
 ```
 
-In Java
+In Java:
 ```java
 AppInfo get(String providerName, String appName);  // returns an AppInfo object.
 ```
 
-Note: if repository contains a single application for given provider,  the *app name* can be omitted.
+Note: if repository contains a single application for given provider,  the *app name* can be omitted (or set to null).
 
-user_credentials_repo is an UserCredentialsRepository object (interface).
+user_credentials_repo is an `UserCredentialsRepository` object (interface).
 This object is read/write : it stores users credentials (access_token, refresh_token, expiration date, etc.)
 and persist new tokens when they are refreshed.
 Methods are:
 
-In python
+In python:
 ```python
 get(app_info, user_id=None)  # returns a UserCredentials object
 save(user_credentials)  # persists the given user_credentials object
 ```
 
-In Java
+In Java:
 ```java
 UserCredentials<?> get(AppInfo appInfo, String userId);  // returns a UserCredentials object
 void save(UserCredentials<?> userCredentials) throws IOException;  // persists the given user_credentials object
 ```
 
-Note: if repository contains a single user for given application, the *user id* may be omitted.
+Note: if repository contains a single user for given application, the *user id* may be omitted (or set to null).
 
 See [OAuth2](oauth2.md) page to better understand these objects.

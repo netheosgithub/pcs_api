@@ -4,7 +4,7 @@
 
     <groupId>net.netheos.pcs-api</groupId>
     <artifactId>pcs-api-java-sample</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>

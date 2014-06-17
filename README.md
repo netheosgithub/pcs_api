@@ -61,7 +61,8 @@ pcs_api can handle several authentications types:
 
 Each provider has its specificity that are described [here](docs/provider_specifics.md);
 
-The stream on files are wrapped by the same objects whatever the choosen provider. To read a file from the server the ByteSink interface must be used and to write a file, the ByteSource must be used.
+The stream on files are wrapped by the same objects whatever the choosen provider.
+To download a file (blob) from provider the ByteSink interface must be used and to upload some data, the ByteSource must be used.
 More informations are available [here](docs/byte_sources_and_sinks.md);
 
 For more technical informations, please read this [page](docs/advanced.md).
