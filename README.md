@@ -66,3 +66,10 @@ To download a file (blob) from provider the ByteSink interface must be used and 
 More informations are available [here](docs/byte_sources_and_sinks.md);
 
 For more technical informations, please read this [page](docs/advanced.md).
+
+Support
+-------
+Please fill a github issue to report any problem or enhancement request.
+
+Contributors are welcome.
+
