@@ -1,6 +1,6 @@
 //ext {
   GROUP='net.netheos'
-  VERSION_NAME='1.0.1'
+  VERSION_NAME='1.1-SNAPSHOT'
 
   POM_DESCRIPTION='A lightweight library that abstract providers and gives a uniform API to several personal cloud storages providers'
   POM_URL='https://github.com/netheosgithub/pcs_api'
