@@ -23,7 +23,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.1'
+        classpath 'com.android.tools.build:gradle:0.11.+'
     }
 }
 
@@ -44,11 +44,11 @@ allprojects {
     uploadArchives {
         repositories {
             mavenDeployer {
+                setUniqueVersion(false) // to install -SNAPSHOT and not timestamped files
                 repository(url: "file://${System.properties['user.home']}/.m2/repository")
             }
         }
     }
-
 }
 
 import org.gradle.plugins.signing.Sign
