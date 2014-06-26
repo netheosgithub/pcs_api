@@ -545,7 +545,7 @@ public class BasicTest
                 storage.createFolder( path );
 
                 // This is known to fail on CloudMe :
-                Assume.assumeThat( "Creating folder when path contains a blob should raise : not supported by CloudMe",
+                Assume.assumeThat( "Creating folder when path contains a blob should raise: not supported by Dropbox",
                                    storage.getProviderName(), not( equalTo( Dropbox.PROVIDER_NAME ) ) );
                 fail( "Creating folder when path contains a blob should raise" );
 

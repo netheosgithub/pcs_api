@@ -16,3 +16,4 @@ compile_commands.json
 nbproject/
 .env/
 
+/samples/android/.nb-gradle/private/
