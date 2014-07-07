@@ -23,4 +23,3 @@ Some details change however:
   them as blobs with a negative length, and a CInvalidFileTypeError is raised in case of download attempt.
 - Google Drive sometimes still presents a deleted folder even after it has been shortly trashed.
   A freshly uploaded file may not be found for download, or, if file has been updated, the old version may be returned.
-- Rapidshare does not support "last nb bytes" range downloads ( CDownloadRequest.range(None, nb) )

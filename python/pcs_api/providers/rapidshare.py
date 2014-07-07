@@ -35,7 +35,8 @@ from ..utils import (buildCStorageError, ensure_content_type_is_json, shorten_ur
 logger = logging.getLogger(__name__)
 
 
-@register_provider
+# Rapidshare does not have any free account anymore, so we do not register anymore:
+# @register_provider
 class RapidShareStorage(IStorageProvider):
     """
     Folder names are not limited (may contain a comma listed as %2C in listrealfolders, etc. even \ and / are accepted).
@@ -52,6 +53,8 @@ class RapidShareStorage(IStorageProvider):
 
     Files uploads: the limit is 100MB for uploads with no account and 2 GB with account.
     Requests rate limit: account locked if more than 6500 API calls in less then 10 minutes.
+
+    Rapidshare does not support "last nb bytes" range downloads ( CDownloadRequest.range(None, nb) )
     """
 
     PROVIDER_NAME = 'rapidshare'
