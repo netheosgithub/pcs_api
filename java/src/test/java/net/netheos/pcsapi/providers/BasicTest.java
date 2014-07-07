@@ -272,14 +272,12 @@ public class BasicTest
         assertArrayEquals( contentFile2, mbs.getData() );
 
         // Check that we can replace replace existing blob with empty content:
-        if ( !storage.getProviderName().equals( GoogleDrive.PROVIDER_NAME ) ) {
-            LOGGER.info( "Checking file overwrite with empty file: {}", fpath2 );
-            contentFile2 = new byte[ 0 ];
-            uploadRequest = new CUploadRequest( fpath2, new MemoryByteSource( contentFile2 ) );
-            storage.upload( uploadRequest );
-            storage.download( downloadRequest );
-            assertArrayEquals( contentFile2, mbs.getData() );
-        }
+        LOGGER.info( "Checking file overwrite with empty file: {}", fpath2 );
+        contentFile2 = new byte[ 0 ];
+        uploadRequest = new CUploadRequest( fpath2, new MemoryByteSource( contentFile2 ) );
+        storage.upload( uploadRequest );
+        storage.download( downloadRequest );
+        assertArrayEquals( contentFile2, mbs.getData() );
 
         // Create a sub_sub_folder :
         CPath subSubPath = subPath.add( "a_sub_sub_folder" );

@@ -174,15 +174,12 @@ def test_file_operations(storage):
     assert mbs.get_bytes() == content_file2
 
     # Check that we can replace existing blob with empty content:
-    if storage.provider_name() != 'googledrive':
-        # Google Drive does not support empty content update.
-        # See http://stackoverflow.com/questions/12180392/on-google-drive-sdk-how-to-update-a-file-with-an-empty-content-confirmed-bug
-        logger.info('Checking file overwrite with empty file: %s', fpath2)
-        content_file2 = b''
-        upload_request = CUploadRequest(fpath2, MemoryByteSource(content_file2))
-        storage.upload(upload_request)
-        storage.download(download_request)
-        assert mbs.get_bytes() == content_file2
+    logger.info('Checking file overwrite with empty file: %s', fpath2)
+    content_file2 = b''
+    upload_request = CUploadRequest(fpath2, MemoryByteSource(content_file2))
+    storage.upload(upload_request)
+    storage.download(download_request)
+    assert mbs.get_bytes() == content_file2
 
     # Create a sub_sub_folder:
     sub_sub_path = sub_path.add('a_sub_sub_folder')

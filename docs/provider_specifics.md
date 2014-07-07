@@ -23,6 +23,4 @@ Some details change however:
   them as blobs with a negative length, and a CInvalidFileTypeError is raised in case of download attempt.
 - Google Drive sometimes still presents a deleted folder even after it has been shortly trashed.
   A freshly uploaded file may not be found for download, or, if file has been updated, the old version may be returned.
-  As of 2014-05-16, Google Drive ignores empty uploads when updating a file content (no error, but content is not updated).
-  See http://stackoverflow.com/questions/12180392/on-google-drive-sdk-how-to-update-a-file-with-an-empty-content-confirmed-bug
 - Rapidshare does not support "last nb bytes" range downloads ( CDownloadRequest.range(None, nb) )
