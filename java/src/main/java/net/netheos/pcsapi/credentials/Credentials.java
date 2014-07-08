@@ -16,9 +16,6 @@
 
 package net.netheos.pcsapi.credentials;
 
-import java.util.Date;
-import net.netheos.pcsapi.oauth.OAuth2;
-
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -48,22 +45,10 @@ public abstract class Credentials
 
         if ( jsonObj.has( PasswordCredentials.PASSWORD ) ) {
             // Password credentials
-            String password = jsonObj.optString( PasswordCredentials.PASSWORD, null );
-
-            return new PasswordCredentials( password );
-
+            return PasswordCredentials.fromJson( jsonObj );
         } else {
-            // OAuth credentials
-            String accessToken = jsonObj.optString( OAuth2Credentials.ACCESS_TOKEN, null );
-            long expiresAt_s = jsonObj.optLong( OAuth2Credentials.EXPIRES_AT, -1 );
-            String refreshToken = jsonObj.optString( OAuth2.REFRESH_TOKEN, null );
-            String tokenType = jsonObj.optString( OAuth2Credentials.TOKEN_TYPE, null );
-
-            Date expireAt = null;
-            if ( expiresAt_s != -1 ) {
-                expireAt = new Date( expiresAt_s * 1000 );
-            }
-            return new OAuth2Credentials( accessToken, expireAt, refreshToken, tokenType );
+            // OAuth2 credentials
+            return OAuth2Credentials.fromJson( jsonObj );
         }
     }
 

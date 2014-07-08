@@ -47,7 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Sample using the "dropbox" provider.
+ * Sample program ; an optional single command line argument defines provider to be used (defaults to Dropbox).
  *
  * To execute properly, a file named "app_info_data.txt" must be written in the "repositories" directory at the Git
  * root folder (or in another folder defined by environment variable PCS_API_REPOSITORY_DIR).
@@ -61,10 +61,14 @@ public class Main
 
     private static final Logger LOGGER = LoggerFactory.getLogger( Main.class );
 
-    private static final String PROVIDER_NAME = "dropbox";
+    private static final String DEFAULT_PROVIDER_NAME = "dropbox";
 
     public static void main( String[] args )
     {
+        String providerName = DEFAULT_PROVIDER_NAME;
+        if ( args.length == 1 ) {
+            providerName = args[0];
+        }
         try {
             String path = System.getenv( "PCS_API_REPOSITORY_DIR" );
             if ( path == null ) {
@@ -87,8 +91,8 @@ public class Main
             UserCredentialsRepository userCredentialsRepo = new UserCredentialsFileRepository( credsFile );
 
             // Build the provider
-            IStorageProvider storage = StorageFacade.forProvider( PROVIDER_NAME )
-                    .setAppInfoRepository( appInfoRepo, appInfoRepo.get( PROVIDER_NAME ).getAppName() )
+            IStorageProvider storage = StorageFacade.forProvider( providerName )
+                    .setAppInfoRepository( appInfoRepo, appInfoRepo.get( providerName ).getAppName() )
                     .setUserCredentialsRepository( userCredentialsRepo, null )
                     .setForBootstrapping( !credsFile.exists() )
                     .build();

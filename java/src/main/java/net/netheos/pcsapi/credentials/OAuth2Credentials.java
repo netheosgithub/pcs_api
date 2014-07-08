@@ -31,17 +31,28 @@ public class OAuth2Credentials
 
     private static final Logger LOGGER = LoggerFactory.getLogger( OAuth2Credentials.class );
 
-    static final String ACCESS_TOKEN = "access_token";
-    static final String EXPIRES_IN = "expires_in";
-    static final String EXPIRES_AT = "expires_at";
-    static final String TOKEN_TYPE = "token_type";
+    private static final String ACCESS_TOKEN = "access_token";
+    private static final String EXPIRES_IN = "expires_in";
+    private static final String EXPIRES_AT = "expires_at";
+    private static final String TOKEN_TYPE = "token_type";
 
     private String accessToken;
-    private Date expiresAt;
+    private Date expiresAt; // may be null if no expiration date
     private String refreshToken;
     private String tokenType;
 
-    OAuth2Credentials( String accessToken, Date expiresAt, String refreshToken, String tokenType )
+    // package private
+    static OAuth2Credentials fromJson( JSONObject jsonObj )
+    {
+        String accessToken = jsonObj.optString( OAuth2Credentials.ACCESS_TOKEN, null );
+        Date expiresAt = calculateExpiresAt( jsonObj );
+        String refreshToken = jsonObj.optString( OAuth2.REFRESH_TOKEN, null );
+        String tokenType = jsonObj.optString( OAuth2Credentials.TOKEN_TYPE, null );
+
+        return new OAuth2Credentials( accessToken, expiresAt, refreshToken, tokenType );
+    }
+
+    private OAuth2Credentials( String accessToken, Date expiresAt, String refreshToken, String tokenType )
     {
         this.accessToken = accessToken;
         this.expiresAt = expiresAt;
@@ -99,7 +110,7 @@ public class OAuth2Credentials
     }
 
     /**
-     * Update the credentials from a JSON request response
+     * Update the credentials from a JSON request response.
      *
      * @param json The JSON object containing the values to update
      */
@@ -107,10 +118,39 @@ public class OAuth2Credentials
     {
         accessToken = json.getString( ACCESS_TOKEN );
         tokenType = json.getString( TOKEN_TYPE );
-        expiresAt = new Date( System.currentTimeMillis() + ( json.getInt( EXPIRES_IN ) * 1000 ) );
+        expiresAt = calculateExpiresAt( json );
         if ( json.has( OAuth2.REFRESH_TOKEN ) ) {
             refreshToken = json.getString( OAuth2.REFRESH_TOKEN );
         }
+    }
+
+    /**
+     * Calculate expiration timestamp, if not defined.
+     * 
+     * Several cases: absolute expiration time exists in json, or only relative, or no expiration.
+     * 
+     * @param jsonObj
+     * @return expiration date, or null if none.
+     */
+    private static Date calculateExpiresAt( JSONObject jsonObj )
+    {
+        long expiresAt_s = jsonObj.optLong( OAuth2Credentials.EXPIRES_AT, -1 );
+        // If nothing specified in json, check if expires_in is present:
+        // this happens when token is received from oauth server
+        if ( expiresAt_s < 0 && jsonObj.has( OAuth2Credentials.EXPIRES_IN ) ) {
+            long expiresIn_s = jsonObj.getLong( OAuth2Credentials.EXPIRES_IN );
+            // We take a margin to be safe: it appears that some providers do NOT take any margin
+            // so token will not be early refreshed
+            if ( expiresIn_s > 6 * 60 ) {  // should be always true
+                expiresIn_s -= 5 * 60;  // 5 minutes to be safe
+            }
+            expiresAt_s = System.currentTimeMillis() / 1000 + expiresIn_s;
+        }
+
+        if ( expiresAt_s < 0 ) {
+            return null;
+        }
+        return new Date( expiresAt_s * 1000 );
     }
 
     @Override

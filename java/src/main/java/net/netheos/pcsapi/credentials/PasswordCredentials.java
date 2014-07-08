@@ -29,7 +29,14 @@ public class PasswordCredentials
 
     private final String password;
 
-    PasswordCredentials( String password )
+    // package private
+    static PasswordCredentials fromJson( JSONObject jsonObj )
+    {
+        String password = jsonObj.getString( PasswordCredentials.PASSWORD );
+        return new PasswordCredentials( password );
+    }
+
+    private PasswordCredentials( String password )
     {
         this.password = password;
     }
