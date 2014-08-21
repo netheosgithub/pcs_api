@@ -365,7 +365,7 @@ public class GoogleDrive
     }
 
     /**
-     * Create a folder without creating any higher level intermediary folders, and returned id of created folder.
+     * Create a folder without creating any higher level intermediate folders, and returned id of created folder.
      *
      * @param path
      * @param parentId
@@ -406,7 +406,7 @@ public class GoogleDrive
             return false;
         }
 
-        // we may have to create any intermediary folders :
+        // we may have to create any intermediate folders :
         String parentId = remotePath.getDeepestFolderId();
         int i = remotePath.filesChain.size();
         while ( i < remotePath.segments.size() ) {
@@ -540,8 +540,7 @@ public class GoogleDrive
                     fileId = remotePath.getBlob().getString( "id" );
                 } else {
                     parentId = remotePath.getDeepestFolderId();
-                    // We may need to create intermediary folders first :
-                    // create intermediary folders, in case :
+                    // We may need to create intermediate folders first :
                     int i = remotePath.filesChain.size();
                     while ( i < remotePath.segments.size() - 1 ) {
                         CPath currentPath = remotePath.getFirstSegmentsPath( i + 1 );

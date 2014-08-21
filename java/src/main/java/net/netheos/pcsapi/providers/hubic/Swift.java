@@ -79,7 +79,7 @@ class Swift
     private static final ResponseValidator<CResponse> SWIFT_VALIDATOR = new SwiftResponseValidator();
     private static final ResponseValidator<CResponse> SWIFT_API_VALIDATOR = new SwiftApiResponseValidator( SWIFT_VALIDATOR );
     private static final String CONTENT_TYPE_DIRECTORY = "application/directory";
-    private static final DateFormat DF_LAST_MODIFIED = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH );
+    private static final String DF_LAST_MODIFIED_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     private final String accountEndpoint;
     private final String authToken;
@@ -140,7 +140,7 @@ class Swift
             String url = getObjectUrl( path );
             HttpHead request = new HttpHead( url );
 
-            RequestInvoker<CResponse> ri = getBasicRequestInvoker( request, null );
+            RequestInvoker<CResponse> ri = getBasicRequestInvoker( request, path );
             CResponse response = retryStrategy.invokeRetry( ri );
             return response.getHeaders();
 
@@ -186,7 +186,7 @@ class Swift
     }
 
     /**
-     * Create a folder without creating any higher level intermediary folders.
+     * Create a folder without creating any higher level intermediate folders.
      *
      * @param path The folder path
      */
@@ -215,7 +215,7 @@ class Swift
      *
      * @param leafFolderPath
      */
-    private void createIntermediaryFoldersObjects( CPath leafFolderPath )
+    private void createIntermediateFoldersObjects( CPath leafFolderPath )
             throws CStorageException
     {
         // We check for folder existence before creation,
@@ -244,7 +244,7 @@ class Swift
         if ( !parentFolders.isEmpty() ) {
             LOGGER.debug( "Inexisting parent_folders will be created: {}", parentFolders );
             for ( CPath parent : parentFolders ) {
-                LOGGER.debug( "Creating intermediary folder: {}", parent );
+                LOGGER.debug( "Creating intermediate folder: {}", parent );
                 rawCreateFolder( parent );
             }
         }
@@ -269,7 +269,7 @@ class Swift
         CFile file;
         if ( !CONTENT_TYPE_DIRECTORY.equals( headers.getHeaderValue( "Content-Type" ) ) ) {
             file = new CBlob( path,
-                              Integer.parseInt( headers.getHeaderValue( "Content-Length" ) ),
+                              Long.parseLong( headers.getHeaderValue( "Content-Length" ) ),
                               headers.getHeaderValue( "Content-Type" ),
                               parseTimestamp( headers ),
                               parseMetaHeaders( headers ) );
@@ -386,7 +386,7 @@ class Swift
             throw new CInvalidFileTypeException( path, false );
         }
         if ( useDirectoryMarkers ) {
-            createIntermediaryFoldersObjects( path.getParent() );
+            createIntermediateFoldersObjects( path.getParent() );
         }
         rawCreateFolder( path );
         return true;
@@ -421,9 +421,7 @@ class Swift
         pathnames.add( path.getPathName() );
 
         boolean atLeastOneDeleted = false;
-        boolean lastDeleteWorked = false;
         for ( String pathname : pathnames ) {
-            lastDeleteWorked = false;
             LOGGER.debug( "deleting object at path : {}", pathname );
             String url = getObjectUrl( new CPath( pathname ) );
 
@@ -445,20 +443,21 @@ class Swift
     public void download( CDownloadRequest downloadRequest )
             throws CStorageException
     {
-        String url = getObjectUrl( downloadRequest.getPath() );
+        CPath path = downloadRequest.getPath();
+        String url = getObjectUrl( path );
 
         HttpGet request = new HttpGet( url );
         for ( Header header : downloadRequest.getHttpHeaders() ) {
             request.addHeader( header );
         }
 
-        RequestInvoker<CResponse> ri = getBasicRequestInvoker( request, downloadRequest.getPath() );
+        RequestInvoker<CResponse> ri = getBasicRequestInvoker( request, path );
 
         CResponse response = null;
         try {
             response = retryStrategy.invokeRetry( ri );
             if ( CONTENT_TYPE_DIRECTORY.equals( response.getContentType() ) ) {
-                throw new CInvalidFileTypeException( downloadRequest.getPath(), true );
+                throw new CInvalidFileTypeException( path, true );
             }
             PcsUtils.downloadDataToSink( response, downloadRequest.getByteSink() );
         } finally {
@@ -496,14 +495,15 @@ class Swift
     {
         // Check before upload : is it a folder ?
         // (uploading a blob to a folder would work, but would hide all folder sub-files)
-        CFile file = getFile( uploadRequest.getPath() );
+        CPath path = uploadRequest.getPath();
+        CFile file = getFile( path );
         if ( file != null && file.isFolder() ) {
-            throw new CInvalidFileTypeException( uploadRequest.getPath(), true );
+            throw new CInvalidFileTypeException( path, true );
         }
         if ( useDirectoryMarkers ) {
-            createIntermediaryFoldersObjects( uploadRequest.getPath().getParent() );
+            createIntermediateFoldersObjects( path.getParent() );
         }
-        String url = getObjectUrl( uploadRequest.getPath() );
+        String url = getObjectUrl( path );
         Headers headers = new Headers();
 
         if ( uploadRequest.getContentType() != null ) {
@@ -522,7 +522,7 @@ class Swift
             ByteSource bs = uploadRequest.getByteSource();
             request.setEntity( new ByteSourceEntity( bs ) );
 
-            RequestInvoker<CResponse> ri = getBasicRequestInvoker( request, uploadRequest.getPath() );
+            RequestInvoker<CResponse> ri = getBasicRequestInvoker( request, path );
             retryStrategy.invokeRetry( ri ).close();
 
         } catch ( IOException ex ) {
@@ -533,7 +533,7 @@ class Swift
     static Date parseLastModified( JSONObject json )
     {
         try {
-            String lm = json.optString( "last_modified", null );
+            String lm = json.optString( "last_modified", null ); // "2014-02-12T16:13:49.346540"
             if ( lm == null ) {
                 return null;
             }
@@ -543,11 +543,24 @@ class Swift
                 lm += "+0000";
             }
 
-            // We remove the microseconds
+            // Normalize millis and remove microseconds, if any:
             StringBuilder builder = new StringBuilder( lm );
-            builder.delete( lm.lastIndexOf( '.' ) + 4, lm.lastIndexOf( '+' ) );
-
-            return DF_LAST_MODIFIED.parse( builder.toString() );
+            int dotPos = lm.indexOf( '.' );
+            int plusPos = lm.indexOf( '+' );
+            if ( dotPos > 0 ) {
+                if ( plusPos - dotPos > 4 ) {
+                    builder.delete( dotPos + 4, plusPos );  // remove microsec
+                }
+                else while (plusPos - dotPos < 4) { // complete millis : ".3" -> ".300"
+                    builder.insert( plusPos, '0' );
+                    plusPos++;
+                }
+            }
+            else { // no milliseconds ? defensive code
+                builder.insert(plusPos, ".000");
+            }
+            DateFormat lastModifiedDateFormat = new SimpleDateFormat( DF_LAST_MODIFIED_PATTERN, Locale.ENGLISH );
+            return lastModifiedDateFormat.parse( builder.toString() );
 
         } catch ( ParseException ex ) {
             LOGGER.warn( "Error parsing date", ex );
@@ -557,13 +570,32 @@ class Swift
 
     static Date parseTimestamp( Headers headers )
     {
-        String headerValue = headers.getHeaderValue( "X-Timestamp" );
+        String headerValue = headers.getHeaderValue( "X-Timestamp" ); // "1402590362.23352"
         if ( headerValue == null ) {
             return null;
         }
         int index = headerValue.indexOf( '.' );
-        long date = Long.parseLong( headerValue.substring( 0, index ) ) * 1000;
-        date += Long.parseLong( headerValue.substring( index + 1, index + 4 ) );
+        String seconds, millis;
+        if ( index > 0 ) {
+            seconds = headerValue.substring( 0, index );
+            millis = headerValue.substring( index + 1 );
+            // millis has a variable number of chars...
+            if ( millis.length() > 3 ) {
+                millis = millis.substring( 0, 3 );
+            } else {
+                while ( millis.length() < 3 ) {
+                    millis += "0";
+                }
+            }
+        } else {
+            // no dot is simpler:
+            seconds = headerValue;
+            millis = null;
+        }
+        long date = Long.parseLong( seconds ) * 1000;
+        if ( millis != null ) {
+            date += Long.parseLong( millis );
+        }
 
         return new Date( date );
     }

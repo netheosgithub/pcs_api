@@ -411,20 +411,20 @@ public class CloudMe
             return false;
         }
 
-        cmFolder = createIntermediaryFolders( cmRoot, cpath );
+        cmFolder = createIntermediateFolders( cmRoot, cpath );
 
         return ( cmFolder != null );
     }
 
     /**
-     * Creates folder with given path, with required intermediary folders.
+     * Creates folder with given path, with required intermediate folders.
      *
      * @param cmRoot contains the whole folders structure
      * @param cpath path of folder to create
      * @return the createdfolder corresponding to targeted cpath
      * @throws CInvalidFileTypeException if a blob exists along that path
      */
-    private CMFolder createIntermediaryFolders( CMFolder cmRoot, CPath cpath )
+    private CMFolder createIntermediateFolders( CMFolder cmRoot, CPath cpath )
     {
         List<String> baseNames = cpath.split();
 
@@ -436,10 +436,10 @@ public class CloudMe
             childFolder = currentFolder.getChildByName( baseName );
 
             if ( childFolder == null ) {
-                // Intermediary folder does not exist : has to be created
+                // Intermediate folder does not exist : has to be created
 
                 if ( firstFolderCreation ) {
-                    // This is the first intermediary folder to create:
+                    // This is the first intermediate folder to create:
                     // let's check that there is no blob with that name already existing
                     try {
                         CMBlob cmBlob = getBlobByName( currentFolder, baseName );
@@ -643,7 +643,7 @@ public class CloudMe
 
         if ( cmParentFolder == null ) {
             // parent folder of given path does exist => folders needs to be created
-            cmParentFolder = createIntermediaryFolders( cmRoot, path.getParent() );
+            cmParentFolder = createIntermediateFolders( cmRoot, path.getParent() );
         } else {
 
             CMFolder cmFolder = cmParentFolder.getChildByName( path.getBaseName() );

@@ -333,6 +333,24 @@ public class BasicTest
     }
 
     @Test
+    public void testCreateIntermediateFolders()
+    {
+        // We'll use a temp folder for tests
+        CPath tempRootPath = MiscUtils.generateTestPath( null );
+        LOGGER.info( "Will use test folder : {}", tempRootPath );
+
+        // We create a deep sub-folder, and check each parent has been created:
+        CPath path = tempRootPath.add( "sub1/sub2/sub3/sub4/sub5_folder" );
+        storage.createFolder( path );
+        while ( !path.isRoot() ) {
+            CFile file = storage.getFile( path );
+            assertNotNull( file );
+            assertTrue( file.isFolder() );
+            path = path.getParent();
+        }
+    }
+
+    @Test
     public void testBlobContentType()
             throws Exception
     {
@@ -573,7 +591,7 @@ public class BasicTest
             storage.upload( uploadRequest );
             LOGGER.info( "Created blob : {}", fpath1 );
 
-            // Uploading blob will implicitely create intermediary folders,
+            // Uploading blob will implicitely create intermediate folders,
             // so will try to erase fpath1
             try {
                 CPath path = fpath1.add( "sub_file1" );

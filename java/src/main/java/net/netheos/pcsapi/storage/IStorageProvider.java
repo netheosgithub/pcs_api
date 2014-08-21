@@ -94,7 +94,7 @@ public interface IStorageProvider
             throws CStorageException;
 
     /**
-     * Create a folder at given path, with intermediary folders if needed. Throws CInvalidFileType error if a blob
+     * Create a folder at given path, with intermediate folders if needed. Throws CInvalidFileType error if a blob
      * exists at this path.
      *
      * @param path The folder path to create
