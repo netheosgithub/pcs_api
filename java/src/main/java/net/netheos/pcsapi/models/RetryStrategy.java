@@ -57,7 +57,9 @@ public class RetryStrategy
             currentTries++;
 
             try {
-                LOGGER.debug( "Invokation #{}", currentTries );
+                if ( currentTries > 1 ) {
+                    LOGGER.debug( "Invocation #{}/{}", currentTries, nbTriesMax );
+                }
                 return invoker.call();
 
             } catch ( CRetriableException ex ) {
