@@ -657,7 +657,8 @@ public class GoogleDrive
                 // Some 403 errors (rate limit) may be retriable :
                 if ( response.getStatus() == 403
                      && cse.getMessage() != null
-                     && cse.getMessage().startsWith( "[403/rateLimitExceeded]" ) ) {
+                     && ( cse.getMessage().startsWith( "[403/rateLimitExceeded]" )
+                          || cse.getMessage().startsWith( "[403/userRateLimitExceeded]" ) ) ) {
                     throw new CRetriableException( cse );
                 }
                 // Other errors are not retriable :

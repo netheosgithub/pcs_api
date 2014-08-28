@@ -113,8 +113,11 @@ class GoogleDriveStorage(IStorageProvider):
             if response.status_code >= 500:
                 raise CRetriableError(cse)
             # Some 403 errors (rate limit) may be retriable:
-            if response.status_code == 403 and cse.message.startswith('[403/rateLimitExceeded]'):
-                    raise CRetriableError(cse)
+            if (response.status_code == 403
+                and cse.message
+                and (cse.message.startswith('[403/rateLimitExceeded]')
+                     or cse.message.startswith('[403/userRateLimitExceeded]'))):
+                raise CRetriableError(cse)
             # other errors are not retriable:
             raise cse
         # OK, response looks fine:
