@@ -560,7 +560,7 @@ public class BasicTest
                 LOGGER.info( "Check we cannot create a folder when remote path traverses a blob : {}", path );
                 storage.createFolder( path );
 
-                // This is known to fail on CloudMe :
+                // This is known to fail on Dropbox:
                 Assume.assumeThat( "Creating folder when path contains a blob should raise: not supported by Dropbox",
                                    storage.getProviderName(), not( equalTo( Dropbox.PROVIDER_NAME ) ) );
                 fail( "Creating folder when path contains a blob should raise" );
