@@ -22,12 +22,12 @@ The simplest way to use the library is creating a maven (version 3+) project. Ju
 <dependency>
     <groupId>net.netheos</groupId>
     <artifactId>pcs-api-java</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 If the application does not uses maven, the following jars must be linked:
 
-* pcs-api-java-1.0.1.jar
+* pcs-api-java-1.0.2.jar
 * httpclient-4.2.6.jar
 * httpcore-4.2.6.jar
 * json-20131018.jar
@@ -40,7 +40,7 @@ Android Studio is needed to build an android application.
 It can be downloaded [here](http://developer.android.com/sdk/installing/studio.html).
 To use the library, just add the dependency in the `appname.gradle` file:
 ```gradle
-compile 'net.netheos:pcs-api-android:1.0.1'
+compile 'net.netheos:pcs-api-android:1.0.2'
 ```
 
 Note that Android platform already provides the http client and json jars. The platform agnostic logging API slf4j
@@ -141,12 +141,15 @@ In Java:
 
 See `samples` directory and functional tests for other code examples (running these requires some setup though).
 
-Storage object is thread safe.
-
 Listing a folder (or inquiring blob details) will return None (or null) if remote object does not exist.
 Also deleting a non-existing file is not an error but merely returns false.
 However exceptions are raised if trying to download a non-existing file,
 or if creating a folder but a blob already exists at the same path.
+
+Storage object is thread safe, provided the different threads do not operate on the same objects. Not all operations
+are atomic (for example --depending on provider-- uploading a blob may result in intermediate folders creation. pcs_api
+does this in two steps: check if folders exist, create them if not. A race condition exists if several threads
+attempt to upload to the same non existing folder at the same time: duplicated folders may be created).
 
 Now what are these objects required for building storage facade: app_info_repo, users_credentials_repo?
 These objects are used to manage secrets: application secrets, and users secrets.
