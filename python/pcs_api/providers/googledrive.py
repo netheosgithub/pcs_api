@@ -69,6 +69,11 @@ class GoogleDriveStorage(IStorageProvider):
         self._scope = storage_builder.app_info.scope
         self._retry_strategy = storage_builder.retry_strategy
 
+        if is_application_data_folder_only(self._scope):
+            self._root_id = 'appfolder'
+        else:
+            self._root_id = 'root'
+
     def _buildCStorageError(self, response, c_path):
         # Try to extract error message from json body:
         message = None
@@ -191,17 +196,17 @@ class GoogleDriveStorage(IStorageProvider):
             return len(self.files_chain) == len(self.segments)
 
         def deepest_folder_id(self):
-            """Return id of deepest folder in files_chain, or 'root'.
-            If this remote path does not exist, this is the last existing id, or 'root'.
+            """Return id of deepest folder in files_chain, or self._root_id.
+            If this remote path does not exist, this is the last existing id, or self._root_id.
             Raise ValueError if last segment is a blob"""
             if len(self.files_chain) == 0:
-                return 'root'
+                return self._root_id
             last = self.files_chain[-1]
             if last['mimeType'] == GoogleDriveStorage.MIME_TYPE_DIRECTORY:
                 return last['id']
             # If last is a blob, we return the parent id:
             if len(self.files_chain) == 1:
-                return 'root'
+                return self._root_id
             return self.files_chain[-2]['id']
 
         def get_blob(self):
@@ -576,3 +581,14 @@ class GoogleDriveRequestInvoker(RequestInvoker):
 
 def _parse_date_time(dt_str):
     return dateutil.parser.parse(dt_str)
+
+
+def is_application_data_folder_only(scopes):
+    # Return True if scope contain only rights for managing the Application Data folder
+    # https://developers.google.com/drive/web/appdata
+    for scope in scopes:
+        if scope != 'https://www.googleapis.com/auth/drive.appdata' and \
+           scope != 'https://www.googleapis.com/auth/drive.appfolder':
+            return False
+
+    return True
