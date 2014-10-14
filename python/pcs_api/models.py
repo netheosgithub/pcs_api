@@ -276,7 +276,7 @@ class RequestInvoker(object):
         Determine if the request can be retried, or if we should give up right now.
 
         :returns True is request is retriable, False if not"""
-        logging.warning('Request failed: %s' % e)
+        logging.debug('Request failed: %s' % e)
         # some requests low-level errors that may need to be retried:
         return (isinstance(e, requests.Timeout)
                 or isinstance(e, requests.exceptions.ConnectionError)
