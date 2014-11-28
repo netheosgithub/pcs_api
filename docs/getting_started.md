@@ -1,12 +1,14 @@
 Getting started
 ===============
 
-##Create an application
+##Create a new project
 
 Before creating any application, you may build the library. This process is described in this [page](build.md).
 
 Otherwise, add a reference to pre-built releases in your project dependencies. Releases are available on maven central
 for Java and Android, and pypi for Python.
+
+You must rebuild yourself for C++: no prebuilt binaries are available.
 
 ###Python
 
@@ -46,6 +48,11 @@ compile 'net.netheos:pcs-api-android:1.0.2'
 Note that Android platform already provides the http client and json jars. The platform agnostic logging API slf4j
 is fullfilled by `slf4j-android`. The proper dependencies are declared in pcs-api-android pom.
 
+###C++
+
+Use `sample` cmake CMakeLists.txt file as a base for your project.
+`libpcs_api` is built as a static library.
+
 
 ##Using the library
 
@@ -75,6 +82,25 @@ For android, it is useful to define a custom HttpClient using
 [AndroidHttpClient](http://developer.android.com/reference/android/net/http/AndroidHttpClient.html)
 to be compliant with the platform.
 The client to be used can be set by calling the `setHttpClient()` method, as decribed in the previous example).
+
+In C++:
+```C++
+#include <memory>
+#include "pcs_api/storage_facade.h"
+
+std::shared_ptr<AppInfoRepository> app_info_repo = ...
+std::shared_ptr<UserCredentialsRepository> user_credentials_repo = ...
+std::shared_ptr<pcs_api::IStorageProvider> storage =
+   StorageFacade::ForProvider("hubic")
+               .app_info_repository(app_info_repo, "")
+               .user_credentials_repository(user_credentials_repo, "")
+               .Build();
+```
+
+pcs_api hides any cpprestsdk headers so you do not need any headers files for compiling.
+However, for fine tuning (ie settings timeout or defining proxy), it is possible to include
+some cpprestsdk headers, and then get access to `StorageBuilder::http_client_config()` for tweakings.
+Refer to cpprestsdk documentation for details.
 
 From there storage gives you access to remote files.
 All remote paths are handled by `CPath` objects (a wrapper class containing a pathname of a remote file).
@@ -118,7 +144,7 @@ In Java:
    System.out.println("User quota is: " + quota);
 
    CFolderContent rootFolderContent = storage.listRootFolder();
-   System.out.println("Root folder content = " + root_folder_content);
+   System.out.println("Root folder content = " + rootFolderContent);
 
    // Create a new folder:
    CPath fpath = new CPath("/new_folder");
@@ -128,7 +154,7 @@ In Java:
    // In case intermediary folders are missing, they are created before upload
    CPath bpath = fpath.add("new_file");
    CUploadRequest uploadRequest = new CUploadRequest(bpath, new FileByteSource("my_file.txt"));
-   uploadRequest.setContentType("text/plain");
+   uploadRequest.setContentType("text/plain");  // optional
    storage.upload(uploadRequest);
 
    // Download back the file:
@@ -139,15 +165,57 @@ In Java:
    storage.delete(fpath);
 ```
 
+In C++:
+
+Note that Windows platforms use wide strings (UTF-16), whereas other platforms use narrow strings (UTF-8).
+The PCS_API_STRING_T macro permits to write portable code: it is OS-dependent and should be used for strings
+definitions if program is aimed to be portable (see usage below).
+This OS dependent string type is `pcs_api::string_t`.
+```C++
+   #include "pcs_api/model.h"
+   #include "pcs_api/file_byte_source.h"
+   #include "pcs_api/file_byte_sink.h"
+
+   using namespace pcs_api;
+
+   CQuota quota = storage->GetQuota();
+   std::cout << "User quota is: " << quota << std::endl;
+
+   std::shared_ptr<CFolderContent> root_folder_content = storage->ListRootFolder();
+   std::cout << "Root folder content = " << root_folder_content;
+
+   // Create a new folder:
+   CPath fpath(PCS_API_STRING_T("/new_folder"));
+   storage->CreateFolder(fpath);
+
+   // Upload a local file in this folder:
+   // In case intermediary folders are missing, they are created before upload
+   CPath bpath = fpath.Add(PCS_API_STRING_T("new_file"));
+   std::shared_ptr<ByteSource> fbs = std::make_shared<FileByteSource>(boost::filesystem::path("my_file.txt"));
+   CUploadRequest upload_request(bpath, fbs);
+   upload_request.set_content_type(PCS_API_STRING_T("text/plain"));  // optional
+   storage->Upload(upload_request);
+
+   // Download back the file:
+   std::shared_ptr<ByteSink> bsink = std::make_shared<FileByteSink>(boost::filesystem::path("my_file_back.txt"));
+   CDownloadRequest download_request(bpath, bsink);
+   storage->Download(download_request);
+
+   // delete remote folder: (always recursive)
+   storage->Delete(fpath);
+```
+
 See `samples` directory and functional tests for other code examples (running these requires some setup though).
 
-Listing a folder (or inquiring blob details) will return None (or null) if remote object does not exist.
+Listing a folder (or inquiring blob details) will return None (or null in Java, or empty smart pointer in C++)
+if remote object does not exist.
 Also deleting a non-existing file is not an error but merely returns false.
 However exceptions are raised if trying to download a non-existing file,
 or if creating a folder but a blob already exists at the same path.
 
-Storage object is thread safe, provided the different threads do not operate on the same objects. Not all operations
-are atomic (for example --depending on provider-- uploading a blob may result in intermediate folders creation. pcs_api
+A `Storage` object (`IStorageProvider` in C++) is thread safe, provided the different threads do not operate on the same objects.
+Not all operations are atomic
+(for example --depending on provider-- uploading a blob may result in intermediate folders creation. pcs_api
 does this in two steps: check if folders exist, create them if not. A race condition exists if several threads
 attempt to upload to the same non existing folder at the same time: duplicated folders may be created).
 
@@ -168,11 +236,19 @@ In Java:
 AppInfo get(String providerName, String appName);  // returns an AppInfo object.
 ```
 
-Note: if repository contains a single application for given provider,  the *app name* can be omitted (or set to null).
+In C++:
+```C++
+// returns an AppInfo reference (owned by repository) / virtual method:
+const AppInfo& GetAppInfo(const std::string& provider_name,
+                          const std::string& app_name) const;
+```
+
+Note: if repository contains a single application for given provider,  the *app name* can be omitted
+(or set to null in Java / empty string in C++).
 
 user_credentials_repo is an `UserCredentialsRepository` object (interface).
-This object is read/write : it stores users credentials (access_token, refresh_token, expiration date, etc.)
-and persist new tokens when they are refreshed.
+This object is read/write : it stores users credentials (access_token, refresh_token, expiration date, etc.
+or password for non OAuth providers) and persist new tokens when they are refreshed.
 Methods are:
 
 In python:
@@ -187,6 +263,15 @@ UserCredentials<?> get(AppInfo appInfo, String userId);  // returns a UserCreden
 void save(UserCredentials<?> userCredentials) throws IOException;  // persists the given user_credentials object
 ```
 
-Note: if repository contains a single user for given application, the *user id* may be omitted (or set to null).
+In C++ (methods are virtual):
+```C++
+// returns a UserCredentials object pointer, owned by client:
+std::unique_ptr<UserCredentials> Get(const AppInfo& app_info, const std::string& user_id) const;
+// persists the given user_credentials object:
+void Save(const UserCredentials& user_credentials);
+```
+
+Note: if repository contains a single user for the given application, the *user id* may be omitted
+(or set to null in Java / empty string in C++).
 
 See [OAuth2](oauth2.md) page to better understand these objects.

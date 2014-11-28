@@ -4,6 +4,10 @@ target/
 /android/.nb-gradle/private/
 .gradle
 build
+build_x64
+build_Win32
+build_Release
+build_Debug
 *.iml
 local.properties
 CMakeCache.txt

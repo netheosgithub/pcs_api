@@ -29,7 +29,7 @@ Some details change however:
 
 - Content-type is ignored during upload (content-type seems to be guessed from file extension).
 - Google Drive documents (with content-type application/vnd.google-apps.xxx) are not downloadable per se. pcs_api lists
-  them as blobs with a negative length, and a CInvalidFileTypeError is raised in case of download attempt.
+  them as blobs with a negative length, and a `CInvalidFileTypeError` is raised in case of download attempt.
 - Google Drive sometimes still presents a deleted folder even after it has been shortly trashed.
   A freshly uploaded file may not be found for download, or, if file has been updated, the old version may be returned.
 

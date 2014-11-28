@@ -1,0 +1,4 @@
+// the configured options and settings
+#define PCS_API_VERSION_MAJOR @PCS_API_VERSION_MAJOR@
+#define PCS_API_VERSION_MINOR @PCS_API_VERSION_MINOR@
+

@@ -1,0 +1,3 @@
+[submodule "cpp/third_party/gtest"]
+	path = cpp/third_party/gtest
+	url = https://github.com/tomgr/googletest-mirror

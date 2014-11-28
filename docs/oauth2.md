@@ -71,7 +71,7 @@ Once user has given its authorization, tokens are persisted into users credentia
 
 In python, a sample script is available in the file [get_oauth_tokens.py](../samples/python/get_oauth_tokens.py).
 
-A similar code sample is available for Java: [Main.java](../samples/java/src/main/java/net/netheos/pcsapi/sample/Main.java).
+A similar code sample is available for C++ and Java: [Main.java](../samples/java/src/main/java/net/netheos/pcsapi/sample/Main.java).
 Basically, the following code is used:
 
 ```java
@@ -98,12 +98,18 @@ bootstrapper.getUserCredentials(redirectUrlOrCode);
 ```
 
 Basically user is asked to perform a manual authorization on the URL given by the tool.
-After authorization, user must copy back full redirect url (or only the code displayed in web page) into python (or Java) tool
+After authorization, user must copy back full redirect url (or only the code displayed in web page) into python (or Java or C++) tool
 in order to finish the code workflow (code is exchanged against access_token, and also refresh_token).
 Access token is then used to get user_id, and lastly user credentials are saved into repository.
 From now on, authorization is granted to pcs_api for quite a long time (provider dependent).
 
-Note for Google Drive (this should not occur anymore): sometimes google does not give any refresh token.
+Notes:
+- If authorization redirects to localhost (this may be the case during development),
+and no local http server is listening on localhost, Internet Explorer does not follow
+the redirect and immediately displays an error page. Thus the final URL can not be copied
+as it is not visible. In that case developer is advised to use another browser for his/her tests.
+
+- for Google Drive (this should not occur anymore): sometimes google does not give any refresh token.
 For tests purposes, it is recommended to go to google's user security page and revoke authorization for the application.
 
 As a proof of concept, the sample application for Android shows how this can be performed in an application, by embedding a webview.
