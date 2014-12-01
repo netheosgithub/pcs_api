@@ -47,7 +47,7 @@ const boost::filesystem::path FileByteSink::GetActualPath() {
 
 std::ostream *FileByteSink::OpenStream() {
     boost::filesystem::path actual_path = GetActualPath();
-    LOG_DEBUG << "In FileByteSink::OpenStream(): actual path=" << actual_path;
+    LOG_TRACE << "In FileByteSink::OpenStream(): actual path=" << actual_path;
     p_ofstream_ = std::unique_ptr<boost::filesystem::ofstream>(
                                         new boost::filesystem::ofstream());
     p_ofstream_->open(actual_path,
@@ -134,7 +134,7 @@ void FileByteSink::CloseStream() {
 }
 
 void FileByteSink::SetExpectedLength(std::streamsize length) {
-    LOG_DEBUG << "In FileByteSink::SetExpectedLength(" << length << ")";
+    // LOG_DEBUG << "In FileByteSink::SetExpectedLength(" << length << ")";
     expected_length_ = length;
 }
 

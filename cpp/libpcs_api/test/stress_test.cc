@@ -77,9 +77,10 @@ void StressTest::TestCrud(std::shared_ptr<IStorageProvider> p_storage,
         // if start > now then time has gone back:
         // we give up instead of being trapped in a potentially very long loop
         while (start <= now && (now - start) < g_test_duration) {
+            std::chrono::seconds elapsed =
+                std::chrono::duration_cast<std::chrono::seconds>(now - start);
             LOG_INFO << "============= Thread " << std::this_thread::get_id()
-                << ": (elapsed="
-                << (std::chrono::duration_cast<std::chrono::seconds>(now - start)).count()
+                << ": (elapsed=" << elapsed.count()
                 << " < " << g_test_duration.count() << " s) ================";
             p_storage->GetUserId();  // only to request hubic API
             WithRandomTestPath([&](CPath path) {

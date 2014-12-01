@@ -56,7 +56,7 @@ std::map<string_t, string_t> CDownloadRequest::GetHttpHeaders() const {
         }
 
         string_t header_value = range.str();
-        LOG_DEBUG << "Range: " << header_value;
+        LOG_TRACE << "Range: " << header_value;
         headers[PCS_API_STRING_T("Range")] = header_value;
     }
     return headers;

@@ -70,7 +70,7 @@ Other required tools and packages:
   Boost prebuilt Windows binaries are recommended, as CMake_ext_deps.inc file expects this folders hierarchy.
 - Git for Windows (http://git-scm.com/download/win)
 
-Once compiler, CMake and Boost are installed, follow these steps for
+Once these tools and dependencies have been installed, follow these steps for
 
 ##### Windows configuration:
 

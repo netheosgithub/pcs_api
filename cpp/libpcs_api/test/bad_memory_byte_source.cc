@@ -19,6 +19,8 @@
 
 #include <sstream>
 
+#include "boost/throw_exception.hpp"
+
 #include "pcs_api/c_exceptions.h"
 #include "bad_memory_byte_source.h"
 #include "pcs_api/internal/logger.h"

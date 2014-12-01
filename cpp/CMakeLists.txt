@@ -25,7 +25,7 @@ endif()
 if( CMAKE_COMPILER_IS_GNUCC )
   add_definitions(-std=c++11)
   add_definitions(-Wall)
-  add_definitions(-Wno-unknown-pragmas -Wno-reorder -Wunused-local-typedefs)  # avoids cpprestsdk warnings
+  add_definitions(-Wno-unknown-pragmas -Wno-reorder -Wno-unused-local-typedefs)  # avoids cpprestsdk warnings
 endif()
 
 add_definitions( -D_REENTRANT -DBOOST_ALL_DYN_LINK)
