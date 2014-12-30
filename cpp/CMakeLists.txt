@@ -66,10 +66,10 @@ if ( WIN32 )
   endif()
   set_target_properties(cpprest PROPERTIES
           IMPORTED_CONFIGURATIONS "DEBUG;OPTIMIZED;"
-          IMPORTED_IMPLIB_DEBUG ${CPPREST_RELEASE_DIR}/lib/${CPPREST_ARCH_DIR}/v120/Debug/Desktop/cpprest120d_2_3.lib
-          IMPORTED_LOCATION_DEBUG ${CPPREST_RELEASE_DIR}/bin/${CPPREST_ARCH_DIR}/v120/Debug/Desktop/cpprest120d_2_3.dll
-          IMPORTED_IMPLIB_RELEASE ${CPPREST_RELEASE_DIR}/lib/${CPPREST_ARCH_DIR}/v120/Release/Desktop/cpprest120_2_3.lib
-          IMPORTED_LOCATION_RELEASE ${CPPREST_RELEASE_DIR}/bin/${CPPREST_ARCH_DIR}/v120/Release/Desktop/cpprest120_2_3.dll
+          IMPORTED_IMPLIB_DEBUG ${CPPREST_RELEASE_DIR}/lib/${CPPREST_ARCH_DIR}/v120/Debug/Desktop/cpprest120d_2_4.lib
+          IMPORTED_LOCATION_DEBUG ${CPPREST_RELEASE_DIR}/bin/${CPPREST_ARCH_DIR}/v120/Debug/Desktop/cpprest120d_2_4.dll
+          IMPORTED_IMPLIB_RELEASE ${CPPREST_RELEASE_DIR}/lib/${CPPREST_ARCH_DIR}/v120/Release/Desktop/cpprest120_2_4.lib
+          IMPORTED_LOCATION_RELEASE ${CPPREST_RELEASE_DIR}/bin/${CPPREST_ARCH_DIR}/v120/Release/Desktop/cpprest120_2_4.dll
 	  )
 endif()
 if ( UNIX )

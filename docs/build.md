@@ -65,7 +65,7 @@ Builds and tests have been performed with MSVC 2013 (aka Visual C++ 12.0) and gc
 Any compiler with C++11 support should be supported.
 Other required tools and packages:
 - `CMake` V2.8
-- cpprestsdk V2.3 (as a NuGet package for Windows; higher versions are likely to be supported)
+- cpprestsdk V2.4 (as a NuGet package for Windows; higher versions are likely to be supported)
 - libboost 1.55 (http://www.boost.org/users/history/version_1_55_0.html).
   Boost prebuilt Windows binaries are recommended, as CMake_ext_deps.inc file expects this folders hierarchy.
 - Git for Windows (http://git-scm.com/download/win)
@@ -98,8 +98,8 @@ Once these tools and dependencies have been installed, follow these steps for
 1. Launch MSVC, and open solution file in build_xxx folder (either 32 or 64 bits): pcs_api.sln
 2. Install CPP ReST SDK dependency into build folder:
    select menu tools/Library package manager/Package manager console, then enter command in console:
-    `Install-Package cpprestsdk -Version 2.3`.
-   This downloads and installs NuGet headers and binary package into *{build_folder}*/packages/cpprestsdk.2.3.0
+    `Install-Package cpprestsdk -Version 2.4`.
+   This downloads and installs NuGet headers and binary package into *{build_folder}*/packages/cpprestsdk.2.4.0
    (so this download is required for both architectures).
    Dependent nuGET packages are also downloaded: openssl, zlib
 3. By now it is possible to build all projects: gtest, libpcs_api, pcs_api_test,
@@ -140,8 +140,9 @@ The PCS_API_REPOSITORY_DIR environment variable is set to *{git_root_folder}*/re
 
 1. cpprestsdk must be cloned and built: refer to specific doc
    (https://casablanca.codeplex.com/wikipage?title=Setup%20and%20Build%20on%20Linux).
-   Set working copy to tag v2.3.0 before building: `git checkout v2.3.0` and keep the
+   Set working copy to tag v2.4.0 before building: `git checkout v2.4.0` and keep the
    `build.release` folder name, as it is referenced from CMakeLists.txt
+   You may need to edit the `Release/src/CMakeLists.txt` file and remove the `-Werror` from `CMAKE_CXX_FLAGS`.
 2. Clone pcs_api repository and sub modules as explained above for Windows.
 3. Create a symbolic link `cpprest` in cpp/ that refers to *{cpprest_git_root_folder}*/Release folder.
    This link is referenced from CMake_ext_deps.inc

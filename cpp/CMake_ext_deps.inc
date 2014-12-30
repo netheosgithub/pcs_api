@@ -3,7 +3,7 @@
 # Keep quotes around paths
 
 # MSVC installs nuget package in sub-dir of build/packages:
-set( CPPREST_ROOT  "${PROJECT_BINARY_DIR}/packages/cpprestsdk.2.3.0/build/native" )
+set( CPPREST_ROOT  "${PROJECT_BINARY_DIR}/packages/cpprestsdk.2.4.0/build/native" )
 
 if ( WIN32 )
   #set ( Boost_DEBUG ON )
@@ -25,6 +25,6 @@ if ( UNIX )
   #set( BOOST_LIBRARYDIR ${BOOST_ROOT}/lib64-msvc-12.0 )
 
   # cpprest project location:
-  # TODO symbolic link for now: cpp/cpprest -> /where/is/casablanca/compiled
+  # TODO symbolic link for now: cpp/cpprest -> /where/is/casablanca/Release/
   set( CPPREST_RELEASE_DIR ${PROJECT_SOURCE_DIR}/cpprest )
 endif()

@@ -18,7 +18,6 @@
 
 #include "boost/date_time/posix_time/posix_time_io.hpp"
 
-#include "cpprest/basic_types.h"
 #include "cpprest/json.h"
 
 #include "pcs_api/oauth2_credentials.h"

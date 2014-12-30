@@ -18,7 +18,6 @@
 
 #include "cpprest/http_msg.h"
 #include "cpprest/http_client.h"
-#include "cpprest/http_helpers.h"
 #include "cpprest/json.h"
 #include "cpprest/asyncrt_utils.h"
 

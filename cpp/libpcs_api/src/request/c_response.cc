@@ -18,7 +18,6 @@
 #include "boost/property_tree/xml_parser.hpp"
 #include "boost/algorithm/string.hpp"
 
-#include "cpprest/http_helpers.h"
 #include "cpprest/asyncrt_utils.h"
 #include "cpprest/interopstream.h"
 
@@ -268,12 +267,8 @@ std::string CResponse::ToString() const {
 /**
  * A CResponse object may be destroyed _before_ response has been fully
  * consumed. In this case we cancel request.
- * 
- * As cpprest does not support cancel under non Windows platforms, we consume
- * body if not on Windows.
  */
 CResponse::~CResponse() {
-#if defined _WIN32 || defined _WIN64
     try {
         LOG_TRACE << "~CResponse : canceling token...";
         cancel_source_.cancel();  // no-op if body has already been read
@@ -281,17 +276,6 @@ CResponse::~CResponse() {
     catch(...) {
         LOG_WARN << "Could not cancel request: " << CurrentExceptionToString();
     }
-#else
-    try {
-        LOG_TRACE << "~CResponse : reading body...";
-        response_.content_ready().get();
-        LOG_TRACE << "~CResponse : body read.";
-    }
-    catch(...) {
-        LOG_WARN << "Could not read response body: "
-                 << CurrentExceptionToString();
-    }
-#endif
     release_client_function_(p_client_);
 }
 

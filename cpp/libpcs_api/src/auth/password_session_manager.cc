@@ -16,7 +16,6 @@
 
 #include <mutex>
 
-#include "cpprest/http_helpers.h"
 #include "cpprest/json.h"
 #include "cpprest/asyncrt_utils.h"
 

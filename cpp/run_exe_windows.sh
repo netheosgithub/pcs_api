@@ -55,7 +55,7 @@ shift
 BUILD_DIR="$PWD/build_$ARCH"
 
 # Add path to cpprest dll:
-CPPREST_DLL_DIR="$BUILD_DIR/packages/cpprestsdk.2.3.0/build/native/bin/$ARCH/$TOOLS/$CONFIG/Desktop"
+CPPREST_DLL_DIR="$BUILD_DIR/packages/cpprestsdk.2.4.0/build/native/bin/$ARCH/$TOOLS/$CONFIG/Desktop"
 PATH="$PATH:$CPPREST_DLL_DIR"
 OPENSSL_DLL_DIR="$BUILD_DIR/packages/openssl.redist.1.0.1.25/build/native/bin/$TOOLS/$ARCH/$CONFIG/dynamic"
 PATH="$PATH:$OPENSSL_DLL_DIR"

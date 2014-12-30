@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "cpprest/http_helpers.h"
+#include "cpprest/details/http_helpers.h"
 
 #include "pcs_api/types.h"
 #include "pcs_api/internal/uri_utils.h"

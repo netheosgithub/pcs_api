@@ -20,7 +20,6 @@
 #include "cpprest/uri.h"
 #include "cpprest/uri_builder.h"
 #include "cpprest/http_msg.h"
-#include "cpprest/http_helpers.h"
 #include "cpprest/asyncrt_utils.h"
 #include "cpprest/interopstream.h"
 

@@ -814,10 +814,6 @@ TEST_P(BasicTest, TestAbortDuringDownload) {
  * exception.
  */
 TEST_P(BasicTest, TestAbortDuringUpload) {
-#if !defined _WIN32 && !defined _WIN64
-    // FIXME create issue in cpprestsdk:
-    NOT_SUPPORTED_BY_OS("!= Windows", "Bug in cpprestsdk");
-#endif
     WithRandomTestPath([&](CPath path) {
         int file_size = 500000;
         LOG_INFO << "Will upload a blob for download test ("
@@ -933,10 +929,6 @@ TEST_P(BasicTest, TestDownloadBadSink) {
  * Here the bad source throws at OpenStream()
  */
 TEST_P(BasicTest, TestUploadBadSourceOpen) {
-#if !defined _WIN32 && !defined _WIN64
-    // FIXME create issue in cpprestsdk:
-    NOT_SUPPORTED_BY_OS("!= Windows", "Bug in cpprestsdk");
-#endif
     WithRandomTestPath([&](CPath path) {
         LOG_INFO << "Will try to upload a blob from a throwing bad source to "
                  << path;
@@ -967,9 +959,6 @@ TEST_P(BasicTest, TestUploadBadSourceOpen) {
 * Here the source does not provide the expected number of bytes.
 */
 TEST_P(BasicTest, TestUploadBadSourceStream) {
-#if !defined _WIN32 && !defined _WIN64
-    NOT_SUPPORTED_BY_OS("!= Windows", "Bug in cpprestsdk");
-#endif
     WithRandomTestPath([&](CPath path) {
         LOG_INFO << "Will try to upload a blob from a short bad source to "
                  << path;

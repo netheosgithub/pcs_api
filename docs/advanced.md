@@ -34,8 +34,6 @@ Other strategies may be used by supplying a `RetryStrategy` object when instanti
 ### C++ and non Windows platforms
 
 pcs_api C++ implementation works under Linux with the following limitations (these are consequences
-of cpprestsdk 2.3.0 limitations):
+of cpprestsdk 2.4.0 limitations):
 - CloudMe is not supported
-- Not possible to abort an upload
-- Downloads can not be aborted, as body needs to be fully read to free up resources
 

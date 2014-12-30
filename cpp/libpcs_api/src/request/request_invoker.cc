@@ -68,12 +68,12 @@ bool RequestInvoker::IsRetriable(std::exception_ptr p_ex) {
         ret = true;
         // However, error can be local (ex: when uploading a file):
         // these errors are not transient and should not be retried
-        // The only way is to check exception message (FIXME not robust and
-        // win7 impl specific):
+        // The only way is to check exception message
+        // (FIXME not robust because impl specific):
         if (boost::algorithm::starts_with(he.what(),
                                           "Error reading outgoing HTTP body")
            || boost::algorithm::starts_with(he.what(),
-                       "Unexpected end of request body stream encountered")) {
+                       "Unexpected end of request body stream")) {
             ret = false;
         }
     }

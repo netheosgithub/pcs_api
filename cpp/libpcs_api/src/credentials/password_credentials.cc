@@ -16,7 +16,6 @@
 
 #include <memory>
 
-#include "cpprest/basic_types.h"
 #include "cpprest/json.h"
 
 #include "pcs_api/password_credentials.h"

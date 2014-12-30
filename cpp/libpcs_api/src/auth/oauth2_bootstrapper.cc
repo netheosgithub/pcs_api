@@ -17,7 +17,7 @@
 #include "boost/algorithm/string/predicate.hpp"
 
 #include "cpprest/uri_builder.h"
-#include "cpprest/uri_parser.h"
+#include "cpprest/details/uri_parser.h"
 
 #include "pcs_api/oauth2_bootstrapper.h"
 #include "pcs_api/c_exceptions.h"
