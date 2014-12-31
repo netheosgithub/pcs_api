@@ -57,8 +57,9 @@ BUILD_DIR="$PWD/build_$ARCH"
 # Add path to cpprest dll:
 CPPREST_DLL_DIR="$BUILD_DIR/packages/cpprestsdk.2.4.0/build/native/bin/$ARCH/$TOOLS/$CONFIG/Desktop"
 PATH="$PATH:$CPPREST_DLL_DIR"
-OPENSSL_DLL_DIR="$BUILD_DIR/packages/openssl.redist.1.0.1.25/build/native/bin/$TOOLS/$ARCH/$CONFIG/dynamic"
-PATH="$PATH:$OPENSSL_DLL_DIR"
+# openssl is statically linked from cpprest 2.4+
+#OPENSSL_DLL_DIR="$BUILD_DIR/packages/openssl.redist.1.0.1.25/build/native/bin/$TOOLS/$ARCH/$CONFIG/dynamic"
+#PATH="$PATH:$OPENSSL_DLL_DIR"
 
 # Add path to boost dlls:
 BOOST_ROOT=$(grep "^[ ]*set[ ]*([ ]*BOOST_ROOT" CMake_ext_deps.inc | sed -e 's/.*"\([^"]*\)".*/\1/')
@@ -111,7 +112,7 @@ if [ ! -z "$COPY_DLL" ] ; then
     echo "Copying DLLs in folder $PWD"
     cp -u "$CPPREST_DLL_DIR"/*dll .
     cp -u "$CPPREST_DLL_DIR"/*pdb .
-    cp -u "$OPENSSL_DLL_DIR"/*dll .
+    #cp -u "$OPENSSL_DLL_DIR"/*dll .
     cp -u "$BOOST_DLL_DIR"/boost_filesystem*dll .
     cp -u "$BOOST_DLL_DIR"/boost_system*dll .
     cp -u "$BOOST_DLL_DIR"/boost_thread*dll .

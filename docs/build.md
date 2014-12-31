@@ -101,7 +101,6 @@ Once these tools and dependencies have been installed, follow these steps for
     `Install-Package cpprestsdk -Version 2.4`.
    This downloads and installs NuGet headers and binary package into *{build_folder}*/packages/cpprestsdk.2.4.0
    (so this download is required for both architectures).
-   Dependent nuGET packages are also downloaded: openssl, zlib
 3. By now it is possible to build all projects: gtest, libpcs_api, pcs_api_test,
    and sample : menu Build/Build solution.
    This creates:
