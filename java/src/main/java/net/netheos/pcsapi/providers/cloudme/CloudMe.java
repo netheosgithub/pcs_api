@@ -837,14 +837,12 @@ public class CloudMe
                 }
             } else {
                 // We haven't received a standard server error message ?!
-                // This can happen unlikely. Usually such errors are temporary.
+                // This can happen unlikely. We consider that such errors are temporary.
                 LOGGER.error( "Unparsable server error: {}", stringResponse );
                 // Construct some message for exception:
                 message = PcsUtils.abbreviate( "Unparsable server error: " + stringResponse, 200 );
                 LOGGER.error( "Unparsable server error has headers: {}", response.getHeaders() );
-                if ( response.getStatus() >= 500 ) {
-                    retriable = true;
-                }
+                retriable = true;
             }
 
             CStorageException ret = PcsUtils.buildCStorageException( response, message, cpath );

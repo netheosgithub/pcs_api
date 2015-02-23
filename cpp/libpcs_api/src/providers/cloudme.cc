@@ -131,15 +131,13 @@ void CloudMe::ThrowCStorageException(CResponse *p_response,
         // as we have received a well formed response
     } else {
         // We haven't received a standard server error message ?!
-        // This can happen unlikely. Usually such errors are temporary.
+        // This can happen unlikely. We consider that such errors are temporary.
         std::string string_response = p_response->AsString();
         LOG_ERROR << "Unparsable server error: " << string_response;
         // Construct some message for exception:
         message = utilities::Abbreviate("Unparsable server error: "
                                                       + string_response, 200);
-        if (p_response->status() >= 500) {
-            retriable = true;
-        }
+        retriable = true;
     }
 
     if (!retriable) {

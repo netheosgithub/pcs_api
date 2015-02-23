@@ -104,13 +104,12 @@ class CloudMeStorage(IStorageProvider):
                         # These errors are not retriable, as we have received a well formed response
             else:
                 # We haven't received a standard server error message ?!
-                # This can happen unlikely. Usually such errors are temporary.
+                # This can happen unlikely. We consider that such errors are temporary.
                 message = response.text  # This will be the exception error message
                 logger.error('Unparsable server error: %s', message)
                 logger.error('Unparsable server error has headers: %s', response.headers)
                 message = abbreviate('Unparsable server error: ' + message, 200)
-                if response.status_code >= 500:
-                    retriable = True
+                retriable = True
         except:
             pass
         err = buildCStorageError(response, message, c_path)

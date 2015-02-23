@@ -7,7 +7,7 @@ set( CPPREST_ROOT  "${PROJECT_BINARY_DIR}/packages/cpprestsdk.2.4.0/build/native
 
 if ( WIN32 )
   #set ( Boost_DEBUG ON )
-  set( BOOST_ROOT  "e:/Users/lmorel/dev/boost_1_55_0" )
+  set( BOOST_ROOT  "e:/where/is/installed/boost" )
   # In case boost is not found (Windows prebuilt binaries 1.55 are not found):
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
     set (BOOST_LIBRARYDIR ${BOOST_ROOT}/lib64-msvc-12.0 )
@@ -21,8 +21,7 @@ endif()
 
 if ( UNIX )
   # installed as per Linux distribution, otherwise define :
-  #set( BOOST_ROOT ${BOOST_ROOT_UNIX} )
-  #set( BOOST_LIBRARYDIR ${BOOST_ROOT}/lib64-msvc-12.0 )
+  set( BOOST_ROOT /where/is/installed/boost )
 
   # cpprest project location:
   # TODO symbolic link for now: cpp/cpprest -> /where/is/casablanca/Release/
