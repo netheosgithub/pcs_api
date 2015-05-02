@@ -15,4 +15,4 @@
 # limitations under the License.
 #
 
-__all__ = ['dropbox', 'hubic', 'googledrive', 'cloudme']
+__all__ = ['dropbox', 'hubic', 'googledrive', 'cloudme', 'onedrive']

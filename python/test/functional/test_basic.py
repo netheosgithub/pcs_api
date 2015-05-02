@@ -244,6 +244,8 @@ def test_blob_content_type(storage):
         pytest.xfail('Google drive handles content type quite strangely')
     if storage.provider_name() == 'cloudme':
         pytest.xfail('CloudMe handles content type quite strangely')
+    if storage.provider_name() == 'onedrive':
+        pytest.xfail('OneDrive ignores content type')
 
     temp_root_path = miscutils.generate_test_path()
     try:
@@ -283,6 +285,8 @@ def test_blob_metadata(storage):
         pytest.xfail('Google Drive ignores metadata')
     if storage.provider_name() == 'cloudme':
         pytest.xfail('CloudMe handles ignores metadata')
+    if storage.provider_name() == 'onedrive':
+        pytest.xfail('OneDrive ignores metadata')
 
     temp_root_path = miscutils.generate_test_path()
     try:
@@ -462,8 +466,9 @@ def test_implicit_create_folder_over_blob(storage):
 def test_file_with_special_chars(storage):
     temp_root_path = miscutils.generate_test_path()
     try:
+        safe_name = _filter_name_for_provider(storage.provider_name(), "hum...\u00a0',;.:\u00a0!*%&~#{[|`_ç^@ £€")
+        folder_path = temp_root_path.add(safe_name)
 
-        folder_path = temp_root_path.add("hum...\u00a0',;.:\u00a0!*%&~#{[|`_ç^@ £€")
         storage.create_folder(folder_path)
         fback = storage.get_file(folder_path)
         assert fback.path == folder_path
@@ -540,14 +545,27 @@ def _generate_random_blob_name_char(provider_name):
         c = unichr(codepoint)
         if c == '/' or c == '\\':
             continue;
-        # CloudMe nor rapidshare providers does not support quotes so we do not use them:
-        if c in '"' and provider_name == 'cloudme':
-            continue;
-        if (c in '\'",:@><*?`^') and provider_name == 'rapidshare':
-            continue;
-        if ord(c) > 127 and provider_name == 'rapidshare':
-            continue;
-        return c;
+        c = _filter_name_for_provider(provider_name, c)
+        if c == '':
+            continue
+        return c
+
+
+def _filter_name_for_provider(provider_name, name):
+    """Some providers have constraint on name of files.
+    This method removes invalid chars of the given name
+    Returned value may be empty"""
+    if provider_name == 'cloudme':
+        name = ''.join(c for c in name if c not in '"')
+    elif provider_name == 'rapidshare':
+        name = ''.join(c for c in name if c not in '\'",:@<>*?`^' and ord(c) <= 127)
+    elif provider_name == 'onedrive':
+        name = ''.join(c for c in name if c not in '":;*<>|?')
+        while name.startswith('.'):
+            name = name[1:]
+        while name.endswith('.'):
+            name = name[:-1]
+    return name
 
 
 def test_abort_during_download(storage, tmpdir):

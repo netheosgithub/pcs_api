@@ -148,3 +148,4 @@ if largest_blob:
     # watch download progress :
     dr.progress_listener(StdoutProgressListener())
     storage.download(dr)
+    print()
