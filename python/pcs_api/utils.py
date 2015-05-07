@@ -141,7 +141,10 @@ def download_data_to_sink(response, byte_sink):
         success = True
     finally:
         if not success:
-            out_stream.abort()
+            try:
+                out_stream.abort()  # not all streams are abortable (io.BytesIO are not)
+            except:
+                pass
         out_stream.close()
 
 
