@@ -17,20 +17,18 @@
 
 
 from __future__ import absolute_import, unicode_literals, print_function
-#import datetime
 import dateutil.parser
 import logging
 import contextlib
 import json
-import urllib
-#from requests.packages.urllib3.fields import RequestField
 
 from ..storage import IStorageProvider, register_provider
 from ..oauth.session_managers import OAuth2SessionManager
 from ..oauth.oauth2_params import OAuth2ProviderParameters
 from ..models import (CPath, CBlob, CFolder, CQuota,
                       CUploadRequest, CDownloadRequest, RetryStrategy, RequestInvoker)
-from ..cexceptions import CRetriableError, CAuthenticationError, CInvalidFileTypeError, CFileNotFoundError, CStorageError
+from ..cexceptions import (CRetriableError, CAuthenticationError, CInvalidFileTypeError,
+                           CFileNotFoundError, CStorageError, CHttpError)
 from ..utils import (abbreviate, buildCStorageError, ensure_content_type_is_json, download_data_to_sink, get_content_length)
 
 
@@ -41,14 +39,17 @@ class OneDriveStorage(IStorageProvider):
     """FIXME work in progress !
     Some chars are forbidden in file names (see unit tests for details)
     Content-Type is not handled.
+    See https://github.com/OneDrive/onedrive-api-docs for API reference.
     """
 
     PROVIDER_NAME = 'onedrive'
 
     # OneDrive endpoint:
-    ENDPOINT = 'https://apis.live.net/v5.0'
-    ENDPOINT_ME = ENDPOINT + '/me'
-    ENDPOINT_ME_SKYDRIVE = ENDPOINT_ME + '/skydrive'
+    ENDPOINT = 'https://api.onedrive.com/v1.0'
+    ENDPOINT_DRIVE = ENDPOINT + '/drive'  # user default drive
+    ENDPOINT_DRIVE_ROOT = ENDPOINT_DRIVE + '/root'
+    # This is to retrieve user email (email is user id for user credentials repository)
+    ENDPOINT_ME = 'https://apis.live.net/v5.0/me'
 
     # OAuth2 endpoints and parameters:
     _oauth2ProviderParameters = OAuth2ProviderParameters(
@@ -58,7 +59,6 @@ class OneDriveStorage(IStorageProvider):
         scope_in_authorization=True,
         scope_perms_separator=' ')
 
-
     def __init__(self, storage_builder):
         self._session_manager = OAuth2SessionManager(self._oauth2ProviderParameters,
                                                      storage_builder.app_info,
@@ -66,7 +66,6 @@ class OneDriveStorage(IStorageProvider):
                                                      storage_builder.user_credentials)
         self._scope = storage_builder.app_info.scope
         self._retry_strategy = storage_builder.retry_strategy
-        self._root_id = None # lazily retrieved
 
     def _buildCStorageError(self, response, c_path):
         """FIXME check retriable status codes after calling this method
@@ -74,8 +73,10 @@ class OneDriveStorage(IStorageProvider):
         error = response.json()['error']
         message = error['code'] + ' (' + error['message'] + ')'
         err = buildCStorageError(response, message, c_path)
-        if response.status_code == 420 \
-                or (response.status_code >= 500 and response.status_code != 507):
+        if response.status_code == 429 \
+                or (response.status_code >= 500
+                    and response.status_code != 501
+                    and response.status_code != 507):
             err = CRetriableError(err)
         return err
 
@@ -125,8 +126,8 @@ class OneDriveStorage(IStorageProvider):
         to be used by all API requests"""
         return self._get_request_invoker(self._validate_onedrive_api_response, c_path)
 
-    def _build_file_url(self, file_id):
-        return self.ENDPOINT + '/' + file_id
+    def _build_file_url(self, c_path):
+        return self.ENDPOINT_DRIVE_ROOT + ':' + c_path.url_encoded()
 
     def provider_name(self):
         return OneDriveStorage.PROVIDER_NAME
@@ -140,213 +141,116 @@ class OneDriveStorage(IStorageProvider):
     def get_quota(self):
         """Return a CQuota object.
         """
-        url = self.ENDPOINT_ME_SKYDRIVE + '/quota'
+        url = self.ENDPOINT_DRIVE
         ri = self._get_api_request_invoker()
         resp = self._retry_strategy.invoke_retry(ri.get, url)
-        json = resp.json()
-        total = json['quota']
-        used = total - json['available']
+        quota = resp.json()['quota']
+        total = quota['total']
+        used = quota['used']
         return CQuota(used, total)
 
     def list_root_folder(self):
-        return self._list_folder_by_id(CPath('/'), self._get_root_id())
+        return self.list_folder(CPath('/'))
 
     def list_folder(self, c_folder_or_c_path):
         try:
             c_path = c_folder_or_c_path.path
         except AttributeError:
             c_path = c_folder_or_c_path
-        remote_path = self._find_remote_path(c_path)
-        if not remote_path.exists():
-            # per contract, listing a non existing folder must return None
-            return None
-        if remote_path.last_is_blob():
-            raise CInvalidFileTypeError(c_path, False)
-        folder = remote_path.deepest_folder()
-        return self._list_folder_by_id(folder.path, folder.file_id)
-
-    def _list_folder_by_id(self, c_path, file_id):
-        """
-        """
-        url = self._build_file_url(file_id) + '/files'
-        ri = self._get_api_request_invoker()
-        resp = self._retry_strategy.invoke_retry(ri.get, url)
-        json = resp.json()
-        folder_content = {}
-        for val in json['data']:
-            val_path = c_path.add(val['name'])
-            folder_content[val_path] = self._parse_file(val_path, val)
-        return folder_content
-
-    def _get_root_id(self):
-        if not self._root_id:
+        try:
+            url = self._build_file_url(c_path) + ":/children"
             ri = self._get_api_request_invoker()
-            resp = self._retry_strategy.invoke_retry(ri.get, self.ENDPOINT_ME_SKYDRIVE)
-            self._root_id = resp.json()['id']
-        return self._root_id
+            content_json = self._retry_strategy.invoke_retry(ri.get, url).json()
+            #if not remote_path.exists():
+            #    # per contract, listing a non existing folder must return None
+            #    return None
+            #if remote_path.last_is_blob():
+            #    raise CInvalidFileTypeError(c_path, False)
+            folder_content = {}
+            for val in content_json['value']:
+                val_path = c_path.add(val['name'])
+                folder_content[val_path] = self._parse_item(val_path, val)
+            if not folder_content:
+                # If we found nothing, it may be a blob ; check it was actually a folder:
+                c_file = self.get_file(c_path)
+                if c_file.is_blob():
+                    raise CInvalidFileTypeError(c_path, False)
+            return folder_content
+        except CFileNotFoundError as e:
+            # Folder does not exist
+            return None
 
     def create_folder(self, c_path):
-        # we have to check before if folder already exists:
-        # (and also to determine what folders must be created)
-        remote_path = self._find_remote_path(c_path)
-        if remote_path.last_is_blob():
-            # A blob exists along that path: wrong !
-            raise CInvalidFileTypeError(remote_path.last_c_path(), False)
-        if remote_path.exists():
-            # folder already exists:
-            return False
-
-        # We may need to create intermediate folders first:
-        # FIXME copy/pasted also in upload
-        parent_folder = remote_path.deepest_folder()
-        i = len(remote_path.files_chain)
-        while i < len(remote_path.segments):
-            current_c_path = remote_path.first_segments_path(i+1)
-            parent_folder = self._raw_create_folder(current_c_path, parent_folder, remote_path.segments[i])
-            i += 1
-        return True
-
-    class RemotePath(object):
-        """Utility class used to convert a CPath to a list of onedrive files ids"""
-        def __init__(self, c_path, files_chain, root_id):
-            """
-            :param c_path : the path (exists or not)
-            :param files_chain : tuple of files. If remote c_path exists, len(files_chain) = len(segments).
-                               If trailing files do not exist, chain_files list is truncated, and may even be empty.
-
-            Examples : a,b are folders, c.pdf is a blob.
-            /a/b/c.pdf --> segments = ('a','b','c.pdf')
-                       files_chain = [ {'id':'id_a'...}, {'id':'id_b'...}, {'id':'id_c'...} ]
-                       exists() ? True
-                       last_is_blob() ? True (c.pdf is not a folder)
-
-            /a/b/c.pdf/d --> segments = ('a','b','c.pdf', 'd')
-                       files_chain = [ {'id':'id_a'...}, {'id':'id_b'...}, {'id':'id_c'...} ]
-                       exists() ? False
-                       last_is_blob() ? True (last is c.pdf)
-
-            In case c.pdf does not exist:
-            /a/b/c.pdf --> segments = ('a','b','c.pdf')
-                       files_chain = [ {'id':'id_a'...}, {'id':'id_b'...} ]
-                       exists() ? False
-                       last_is_blob() ? False (if b is folder)
-            """
-            self.path = c_path
-            self.segments = c_path.split()
-            self.files_chain = files_chain
-            self.root_id = root_id
-
-        def exists(self):
-            """Does this path exist onedrive side ?"""
-            return len(self.files_chain) == len(self.segments)
-
-        def deepest_folder(self):
-            """Return deepest folder in files_chain, or root folder.
-            If this remote path does not exist, this is the last existing folder, or root folder.
-            Raise ValueError if last segment is a blob"""
-            if len(self.files_chain) == 0:
-                return CFolder(CPath('/'), self.root_id)
-            last = self.files_chain[-1]
-            if last.is_folder():
-                return last
-            # If last is a blob, we return its parent folder:
-            if len(self.files_chain) == 1:
-                return CFolder(CPath('/'), self.root_id)
-            return self.files_chain[-2]
-
-        def deepest_file(self):
-            """Return deepest file in files_chain, or root folder."""
-            if len(self.files_chain) == 0:
-                return CFolder(CPath('/'), self.root_id)
-            return self.files_chain[-1]
-
-        def get_blob(self):
-            """Return deepest file (should be a blob).
-            Raise ValueError if last segment is a blob"""
-            if not self.last_is_blob():  # should not happen
-                raise ValueError('Inquiring blob of a folder for %r' % self.path)
-            return self.files_chain[-1]
-
-        def last_is_blob(self):
-            if len(self.files_chain) == 0:
-                return False
-            return self.files_chain[-1].is_blob()
-
-        def first_segments_path(self, depth):
-            """Returns CPath composed of 'depth' first segments"""
-            return CPath('/' + '/'.join(self.segments[0:depth]))
-
-        def last_c_path(self):
-            """CPath of last existing file"""
-            return self.first_segments_path(len(self.files_chain))
-
-    def _find_remote_path(self, c_path):
-        """Resolve the given CPath to gather informations (mainly id and type) ; returns a RemotePath object.
-
-        OneDrive API does not allow this natively; we have to start from root folder, and follow the path segments.
-        """
-
-        # easy special case:
         if c_path.is_root():
-            return OneDriveStorage.RemotePath(c_path, (), self._get_root_id())
-        # Here we know that we have at least one path segment
+            return False  # we never create the root folder
+        try:
+            # Intermediate folders are created if they are missing
+            ri = self._get_api_request_invoker(c_path)
+            url = self._build_file_url(c_path.parent()) + ':/children'
+            body = {'name': c_path.base_name(), 'folder': {}}
+            headers = {'Content-Type': 'application/json'}
+            resp = self._retry_strategy.invoke_retry(ri.post, url, data=json.dumps(body), headers=headers)
+            return True
+        except CHttpError as e:
+            if e.status_code == 409 and e.message.startswith('nameAlreadyExists'):
+                # A file already exists ; we have to check it is a folder though
+                c_file = self.get_file(c_path)
+                if not c_file.is_folder():
+                    raise CInvalidFileTypeError(c_path, False)
+                return False
+            if e.status_code == 403:
+                # Most likely a blob exists along the path
+                self._raise_if_blob_in_path(c_path)
+                raise
 
-        segments = c_path.split()
-        current_path = CPath('/')
-        current_id = self._get_root_id()
-        files_chain = []
-        for i, segment in enumerate(segments):
-            content = self._list_folder_by_id(current_path, current_id)
-            # locate folder with current segment name:
-            current_path = current_path.add(segment)
-            next_id = None
-            if current_path in content:
-                files_chain.append(content[current_path])
-                # Stop iteration if we reached a non-folder file:
-                if not content[current_path].is_folder():
-                    break
-                next_id = content[current_path].file_id
-            else:
-                break
-            current_id = next_id
-        return OneDriveStorage.RemotePath(c_path, tuple(files_chain), self._get_root_id())
-
-    def _parse_file(self, c_path, json):
-        file_id = json['id']
-        last_modif = _parse_date_time(json['updated_time'])
-        if _is_folder_type(json['type']):
+    def _parse_item(self, c_path, item_json):
+        file_id = item_json['id']
+        last_modif = _parse_date_time(item_json['lastModifiedDateTime'])
+        if _is_folder_type(item_json):
             obj = CFolder(c_path, file_id, last_modif)
         else:
-            length = json['size']
+            length = item_json['size']
             content_type = None  # OneDrive has no content-type...
             obj = CBlob(length, content_type, c_path, file_id, last_modif)
         return obj
 
-    def _raw_create_folder(self, c_path, parent_folder, name):
-        ri = self._get_api_request_invoker(c_path)
-        url = self._build_file_url(parent_folder.file_id)
-        body = {'name': name}
-        headers = {'Content-Type': 'application/json'}
-        resp = self._retry_strategy.invoke_retry(ri.post, url, data=json.dumps(body), headers=headers)
-        return self._parse_file(c_path, resp.json())
-
-    def _delete_by_id(self, c_path, file_id):
-        url = self._build_file_url(file_id)
-        ri = self._get_api_request_invoker(c_path)
-        resp = self._retry_strategy.invoke_retry(ri.delete, url)
+    def _raise_if_blob_in_path(self, c_path):
+        """Climb up in path hierarchy until we reach a blob, then raise with that blob path.
+        If we reach root without ancountering any blob, return normally"""
+        while not c_path.is_root():
+            c_file = self.get_file(c_path)  # may return None if nothing exists at that path
+            if c_file and c_file.is_blob():
+                raise CInvalidFileTypeError(c_path, False)
+            c_path = c_path.parent()
 
     def delete(self, c_path):
         if c_path.is_root():
             raise CStorageError('Can not delete root folder')
-        remote_path = self._find_remote_path(c_path)
-        if not remote_path.exists():
-            # per contract, deleting a non existing folder must return False
+        url = self._build_file_url(c_path)
+        ri = self._get_api_request_invoker(c_path)
+        try:
+            resp = self._retry_strategy.invoke_retry(ri.delete, url)
+            return True
+        except CFileNotFoundError as e:
             return False
-        self._delete_by_id(c_path, remote_path.files_chain[-1].file_id)
-        return True
+
+        #remote_path = self._find_remote_path(c_path)
+        #if not remote_path.exists():
+        #    # per contract, deleting a non existing folder must return False
+        #    return False
+        #self._delete_by_id(c_path, remote_path.files_chain[-1].file_id)
+        #return True
 
     def get_file(self, c_path):
         """Get CFile for given path, or None if no object exists with that path"""
+        url = self._build_file_url(c_path)
+        ri = self._get_api_request_invoker(c_path)
+        try:
+            resp = self._retry_strategy.invoke_retry(ri.get, url)
+            return self._parse_item(c_path, resp.json())
+        except CFileNotFoundError as e:
+            return None
+
         if c_path.is_root():
             return CFolder(CPath('/'))
         remote_path = self._find_remote_path(c_path)
@@ -356,20 +260,25 @@ class OneDriveStorage(IStorageProvider):
         return remote_path.deepest_file()
 
     def download(self, download_request):
-        self._retry_strategy.invoke_retry(self._do_download, download_request)
+        try:
+            return self._retry_strategy.invoke_retry(self._do_download, download_request)
+        except CFileNotFoundError:
+            # We have to distinguish here between "nothing exists at that path",
+            # and "a folder exists at that path":
+            c_file = self.get_file(download_request.path)
+            if c_file is None:  # Nothing exists
+                raise
+            elif c_file.is_folder():
+                raise CInvalidFileTypeError(c_file.path, True)
+            else:
+                # Should not happen: a file exists but can not be downloaded ?!
+                raise CStorageError('Not downloadable file: %r' % c_file)
 
     def _do_download(self, download_request):
         """This method does NOT retry request"""
         c_path = download_request.path
 
-        remote_path = self._find_remote_path(c_path)
-        if not remote_path.exists():
-            raise CFileNotFoundError("This file does not exist", c_path)
-        if not remote_path.last_is_blob():
-            # the path corresponds to a folder
-            raise CInvalidFileTypeError(remote_path.last_c_path(), True)
-
-        url = self._build_file_url(remote_path.get_blob().file_id) + '/content'
+        url = self._build_file_url(c_path) + ':/content'
         headers = download_request.get_http_headers()
         ri = self._get_basic_request_invoker(c_path)
         with contextlib.closing(ri.get(url,
@@ -378,31 +287,26 @@ class OneDriveStorage(IStorageProvider):
             download_data_to_sink(response, download_request.byte_sink())
 
     def upload(self, upload_request):
-        return self._retry_strategy.invoke_retry(self._do_upload, upload_request)
+        c_path = upload_request.path
+        self.create_folder(c_path.parent())
+        try:
+            return self._retry_strategy.invoke_retry(self._do_upload, upload_request)
+        except CHttpError as e:
+            if e.status_code == 409 and e.message.startswith('nameAlreadyExists'):
+                # A file already exists ; most likely a folder
+                c_file = self.get_file(c_path)
+                if c_file.is_folder():
+                    raise CInvalidFileTypeError(c_path, True)
+            if e.status_code == 403:
+                # Happens when trying to consider blobs as folders along the path
+                self._raise_if_blob_in_path(upload_request.path)
+            raise
 
     def _do_upload(self, upload_request):
+        """Simple upload for now (limited to 100MB)
+        TODO : use resumable upload API"""
         c_path = upload_request.path
-        base_name = c_path.base_name()
-        parent_c_path = c_path.parent()
-        remote_path = self._find_remote_path(c_path)
-        # Check: is it an existing folder ?
-        if remote_path.exists() and not remote_path.last_is_blob():
-            # The CPath corresponds to an existing folder, upload is not possible
-            raise CInvalidFileTypeError(c_path, True)
-        if not remote_path.exists() and remote_path.last_is_blob():
-            # some blob exists in path: wrong !
-            raise CInvalidFileTypeError(remote_path.last_c_path(), False)
-
-        # Create intermediate folders if required
-        # FIXME copy/pasted also in create_folder
-        parent_folder = remote_path.deepest_folder()
-        i = len(remote_path.files_chain)
-        while i < len(remote_path.segments)-1:
-            current_c_path = remote_path.first_segments_path(i+1)
-            parent_folder = self._raw_create_folder(current_c_path, parent_folder, remote_path.segments[i])
-            i += 1
-
-        url = self._build_file_url(parent_folder.file_id) + '/files/' + urllib.quote(base_name.encode('UTF-8'))
+        url = self._build_file_url(c_path) + ':/content'
         in_stream = upload_request.byte_source().open_stream()
         try:
             ri = self._get_api_request_invoker(c_path)
@@ -415,11 +319,15 @@ def _parse_date_time(dt_str):
     return dateutil.parser.parse(dt_str)
 
 
-def _is_blob_type(type):
+def _is_blob_type(item_json):
     """Determine if one drive file type can be represented as a CBlob"""
-    return type == 'file' or type == 'photo' or type == 'audio' or type == 'video'
+    return ('file' in item_json
+            or 'photo' in item_json
+            or 'audio' in item_json
+            or 'video' in item_json)
 
 
-def _is_folder_type(type):
+def _is_folder_type(item_json):
     """Determine if one drive file type can be represented as a CFolder"""
-    return type == 'folder' or type == 'album'
+    return ('folder' in item_json
+            or 'album' in item_json)
