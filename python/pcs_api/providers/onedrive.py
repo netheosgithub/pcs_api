@@ -280,6 +280,10 @@ class OneDriveStorage(IStorageProvider):
 
         url = self._build_file_url(c_path) + ':/content'
         headers = download_request.get_http_headers()
+        # If we have a Range header, disable requests auto compression
+        # (cf. https://github.com/kennethreitz/requests/issues/2632)
+        if 'Range' in headers and 'Accept-Encoding' not in headers:
+            headers['Accept-Encoding'] = None
         ri = self._get_basic_request_invoker(c_path)
         with contextlib.closing(ri.get(url,
                                        headers=headers,

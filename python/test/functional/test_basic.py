@@ -151,9 +151,8 @@ def test_file_operations(storage):
     download_request.range(5, None)  # starting at offset 5
     storage.download(download_request)
     assert mbs.get_bytes() == content_file1[5:]
-    if storage.provider_name() != 'rapidshare' and storage.provider_name() != 'onedrive':
+    if storage.provider_name() != 'rapidshare':
         # rapidshare does not support such requests:
-        # onedrive does not support such range requests
         download_request.range(None, 5)  # last 5 bytes
         storage.download(download_request);
         assert mbs.get_bytes() == content_file1[-5:]
